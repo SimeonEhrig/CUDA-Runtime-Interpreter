@@ -6,6 +6,7 @@ It's a prototype of an interpreter, which can interpret the host code of a CUDA 
 - llvm-dev
 - cuda Toolkit
 - cmake 2.8.8
+- zlib1g-dev
 
 Tested with clang/llvm 5.0 and CUDA 8.0.61
 
@@ -38,7 +39,7 @@ The workflow of the cuda runtime interpreter based on the cuda compiler pipeline
 
 The first three steps are about device code generation. The generation of the fatbinary will be done before starting the interpreter. The device code generation can be performed with either clang's CUDA frontend or NVCC and the tools of NVIDIA's CUDA Toolkit. The interpreter replaces the 4th and 5th step.
 
-The interpreter implemented an alternative mode, which is generating an object file. The object file can be linked (ld) to an exectuable. This mode is just implemented to check if the LLVM module generation works as expected. Activate it by changing the define from `INTERPRET 1` to `INTERPRET 0`.
+The interpreter implemented an alternative mode, which is generating an object file. The object file can be linked (ld) to an executable. This mode is just implemented to check if the LLVM module generation works as expected. Activate it by changing the define from `INTERPRET 1` to `INTERPRET 0`.
 
 ## Execute an Example
 In the `example_prog` folder you can find four example source codes and a compiled cuda kernel (fatbinary).

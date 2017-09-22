@@ -1,0 +1,7 @@
+#Project files
+[Bb]uild/
+
+#local kdevelop config
+.kdev4/
+cuda-interpreter.kdev4
+

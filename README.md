@@ -8,7 +8,7 @@ It's a prototype of an interpreter, which can interpret the host code of a CUDA 
 - cmake 2.8.8
 - zlib1g-dev
 
-Tested with clang/llvm 5.0 and CUDA 8.0.61
+Tested with clang/llvm 5.0, 6.0 and CUDA 8.0.61
 
 ## Installation
 ```bash

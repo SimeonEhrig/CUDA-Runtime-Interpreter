@@ -41,7 +41,19 @@ The first three steps are about device code generation. The generation of the fa
 The interpreter implemented an alternative mode, which is generating an object file. The object file can be linked (ld) to an exectuable. This mode is just implemented to check if the LLVM module generation works as expected. Activate it by changing the define from `INTERPRET 1` to `INTERPRET 0`.
 
 ## Execute an Example
-In the `example_prog` folder you can find four example source codes and a compiled cuda kernel (fatbinary).
+In the `example_prog` folder you can find four example source codes.
+
+### generating fatbinary
+
+Before you can use the interpreter, you have to precompile an fatbinary. The fatbinary is the compiled device-code in an "function-handle", which allows an embedding in the host. There three options to generate the fatbinary.
+
+1. Use the generate\_nvcc\_fatbin.sh script in the example_prog folder and generate with NVIDIAs nvcc a fatbin. 
+2. Use the generate\_clang\_fatbin.sh script in the example_prog folder and generate with clang/llvm and NVIDIAs tools a fatbin.
+3. Run the command `clang++ -### runtime.cu -o runtime -lcudart_static -L/usr/local/cuda-8.0/lib64 -ldl -lrt -pthread` and you get information about the clang and a list of 5 commands. Use the first three commands, to generate a fatbinary. If you do this, you have to change the input- and output-paths of the commands or you have to copy the fatbin from the /tmp folder.
+
+The last option is the most complicated way, but the best way, because it is the closest way to the original implementation of the clang frontend.
+
+### running interpreter
 
 Run the tests with cuda-interpeter and the two arguments as above:
 

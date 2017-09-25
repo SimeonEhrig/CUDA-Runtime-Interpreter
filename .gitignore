@@ -4,4 +4,4 @@
 #local kdevelop config
 .kdev4/
 cuda-interpreter.kdev4
-
+CUDA-Runtime-Interpreter.kdev4

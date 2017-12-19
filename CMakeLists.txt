@@ -23,7 +23,15 @@ set(COMPONENT_LIST mcparser bitreader support mc option)
 
 project(${PROJECT_NAME})
 
-find_package(LLVM REQUIRED CONFIG)
+#set MY_LLVM_BASE_DIR to use self compiled clang/llvm libraries
+if(NOT MY_LLVM_BASE_DIR)
+    find_package(LLVM REQUIRED CONFIG)
+else()
+    set(LLVM_DIR ${MY_LLVM_BASE_DIR}/lib/cmake/llvm)
+    set(LLVM_INCLUDE_DIRS ${MY_LLVM_BASE_DIR}/include)
+    set(LLVM_LIBRARY_DIRS ${MY_LLVM_BASE_DIR}/lib)
+endif()
+
 message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
 message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
 
@@ -91,6 +99,123 @@ target_link_libraries(${PROJECT_NAME}
   LLVMPasses
   LLVMCoroutines
   LLVMLTO
+  
+  LLVMRuntimeDyld
+  LLVMLinker
+  LLVMProfileData
+  LLVMAsmPrinter
+  LLVMIRReader
+  LLVMAsmParser
+  LLVMOrcJIT
+  LLVMInstrumentation
+  LLVMBitWriter
+  LLVMVectorize
+  LLVMBinaryFormat
+  LLVMCodeGen
+  LLVMMCDisassembler
+  LLVMX86Disassembler
+  
+  LLVMAArch64AsmParser
+  LLVMAArch64AsmPrinter
+  LLVMAArch64CodeGen
+  LLVMAArch64Desc
+  LLVMAArch64Disassembler
+  LLVMAArch64Info
+  LLVMAArch64Utils
+  LLVMAMDGPUAsmParser
+  LLVMAMDGPUAsmPrinter
+  LLVMAMDGPUCodeGen
+  LLVMAMDGPUDesc
+  LLVMAMDGPUDisassembler
+  LLVMAMDGPUInfo
+  LLVMAMDGPUUtils
+  LLVMARMAsmParser
+  LLVMARMAsmPrinter
+  LLVMARMCodeGen
+  LLVMARMDesc
+  LLVMARMDisassembler
+  LLVMARMInfo
+  #LLVMARMUtils
+  #LLVMBPFAsmParser
+  LLVMBPFAsmPrinter
+  LLVMBPFCodeGen
+  LLVMBPFDesc
+  LLVMBPFDisassembler
+  LLVMBPFInfo
+  LLVMDebugInfoCodeView
+  LLVMDebugInfoDWARF
+  LLVMDebugInfoMSF
+  LLVMDebugInfoPDB
+  LLVMDemangle
+  LLVMDlltoolDriver
+  #LLVMFuzzMutate
+  LLVMGlobalISel
+  LLVMHexagonAsmParser
+  LLVMHexagonCodeGen
+  LLVMHexagonDesc
+  LLVMHexagonDisassembler
+  LLVMHexagonInfo
+  LLVMLanaiAsmParser
+  LLVMLanaiAsmPrinter
+  LLVMLanaiCodeGen
+  LLVMLanaiDesc
+  LLVMLanaiDisassembler
+  LLVMLanaiInfo
+  LLVMLibDriver
+  LLVMLineEditor
+  LLVMMipsAsmParser
+  LLVMMipsAsmPrinter
+  LLVMMipsCodeGen
+  LLVMMipsDesc
+  LLVMMipsDisassembler
+  LLVMMipsInfo
+  LLVMMIRParser
+  LLVMMSP430AsmPrinter
+  LLVMMSP430CodeGen
+  LLVMMSP430Desc
+  LLVMMSP430Info
+  LLVMNVPTXAsmPrinter
+  LLVMNVPTXCodeGen
+  LLVMNVPTXDesc
+  LLVMNVPTXInfo
+  LLVMObjectYAML
+  LLVMPowerPCAsmParser
+  LLVMPowerPCAsmPrinter
+  LLVMPowerPCCodeGen
+  LLVMPowerPCDesc
+  LLVMPowerPCDisassembler
+  LLVMPowerPCInfo
+  LLVMSelectionDAG
+  LLVMSparcAsmParser
+  LLVMSparcAsmPrinter
+  LLVMSparcCodeGen
+  LLVMSparcDesc
+  LLVMSparcDisassembler
+  LLVMSparcInfo
+  LLVMSymbolize
+  LLVMSystemZAsmParser
+  LLVMSystemZAsmPrinter
+  LLVMSystemZCodeGen
+  LLVMSystemZDesc
+  LLVMSystemZDisassembler
+  LLVMSystemZInfo
+  LLVMTableGen
+  #LLVMWindowsManifest
+  LLVMXCoreAsmPrinter
+  LLVMXCoreCodeGen
+  LLVMXCoreDesc
+  LLVMXCoreDisassembler
+  LLVMXCoreInfo
+  LLVMXRay
+
+  
+  pthread
+  z
+  dl
+  tinfo
+  rt
+  atomic
+  m
 )
 
 target_link_libraries(${PROJECT_NAME} clang)

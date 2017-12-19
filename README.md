@@ -11,11 +11,25 @@ It's a prototype of an interpreter, which can interpret the host code of a CUDA 
 Tested with clang/llvm 5.0, 6.0 and CUDA 8.0.61
 
 ## Installation
+If you want to use own compiled libraries, goto to the next section. To build the interpreter with clang/llvm-libraries, which are installed via packet manager (e.g. dpkg), do the following steps.
+
 ```bash
   cd <path_to>/CUDA-Runtime-Interpreter
   mkdir build
   cd build
   cmake ..
+  make
+```
+
+## Installation with own compiled clang/llvm-libraries
+If you want to use own compiled clang/llvm-libraries, for example to debug the code, do the following steps.
+
+```bash
+  cd <path_to>/CUDA-Runtime-Interpreter
+  ln -s <path_to_llvm_install>/lib64 lib64
+  mkdir build
+  cd build
+  cmake .. -DMY_LLVM_BASE_DIR=<path_to_llvm_install>
   make
 ```
 

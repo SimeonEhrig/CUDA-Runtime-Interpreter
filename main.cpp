@@ -32,9 +32,11 @@
 #include <llvm/Support/DynamicLibrary.h>
 
 #include <string>
-#include <OrcJit.hpp>
 #include <llvm/Support/TargetRegistry.h>
 #include <libgen.h>
+
+#include "OrcJit.hpp"
+#include "Backend.hpp"
 
 //if interpret is not enable, it will be generate an object file instead interpret the code
 #define INTERPRET 1
@@ -53,9 +55,6 @@ std::string getExecutablePath(const char *Argv0) {
   void *mainAddr = (void*) (intptr_t) getExecutablePath;
   return llvm::sys::fs::getMainExecutable(Argv0, mainAddr);
 }
-
-static int executeJIT(std::unique_ptr<llvm::Module> &module); 
-static int genObjectFile(std::unique_ptr<llvm::Module> &module, std::string outputName);
 
 int main(int argc, const char **argv, char * const *envp) {
   //=================input check and getting file information==================
@@ -206,78 +205,4 @@ int main(int argc, const char **argv, char * const *envp) {
   llvm::llvm_shutdown();
 
   return res;
-}
-
-static int executeJIT(std::unique_ptr<llvm::Module> &module){
-  LLVMInitializeX86TargetInfo();
-  LLVMInitializeX86Target();
-  LLVMInitializeX86TargetMC();
-  LLVMInitializeX86AsmParser();
-  LLVMInitializeX86AsmPrinter();
-  
-  std::string error;
-  auto Target = llvm::TargetRegistry::lookupTarget(module->getTargetTriple(), error);
-    
-  if (!Target) {
-    llvm::errs() << error;
-    return 1;
-  }
-  
-  llvm::Optional<llvm::Reloc::Model>  RM = llvm::Optional<llvm::Reloc::Model>();
-    
-  llvm::TargetOptions TO = llvm::TargetOptions();
-  
-  llvm::TargetMachine * targetMachine = Target->createTargetMachine(module->getTargetTriple(), "generic", "", TO, RM);
-
-  llvm::orc::Orc_JIT orcJitExecuter(targetMachine);
-  orcJitExecuter.setDynamicLibrary("/usr/local/cuda-8.0/lib64/libcudart.so");
-  orcJitExecuter.addModule(std::move(module));
-  auto mainSymbol = orcJitExecuter.findSymbol("main");
-  int (*mainFP)(int, char**) = (int (*)(int, char**))(uintptr_t)mainSymbol.getAddress().get();
-  return mainFP(1, nullptr );
-}
-
-static int genObjectFile(std::unique_ptr<llvm::Module> &module, std::string outputName){
-  LLVMInitializeX86TargetInfo();
-  LLVMInitializeX86Target();
-  LLVMInitializeX86TargetMC();
-  LLVMInitializeX86AsmParser();
-  LLVMInitializeX86AsmPrinter();
-  
-  std::string error;
-  auto Target = llvm::TargetRegistry::lookupTarget(module->getTargetTriple(), error);
-    
-  if (!Target) {
-    llvm::errs() << error;
-    return 1;
-  }
-  
-  llvm::Optional<llvm::Reloc::Model>  RM = llvm::Optional<llvm::Reloc::Model>();
-    
-  llvm::TargetOptions TO = llvm::TargetOptions();
-  
-  llvm::TargetMachine * targetMachine = Target->createTargetMachine(module->getTargetTriple(), "generic", "", TO, RM);
-  
-  module->setDataLayout(targetMachine->createDataLayout());
-  
-  std::error_code EC;
-  llvm::raw_fd_ostream dest(outputName + ".o", EC, llvm::sys::fs::F_None);
-
-  if (EC) {
-   llvm::errs() << "Could not open file: " << EC.message();
-   return 1;
-  }
-  
-  llvm::legacy::PassManager pass;
-  auto FileType = llvm::TargetMachine::CGFT_ObjectFile;
-
-  if (targetMachine->addPassesToEmitFile(pass, dest, FileType)) {
-    llvm::errs() << "TargetMachine can't emit a file of this type";
-    return 1;
-  }
-
-  pass.run(*module);
-  dest.flush();
-  
-  return 0;
 }

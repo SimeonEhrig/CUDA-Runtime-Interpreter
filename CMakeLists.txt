@@ -55,7 +55,7 @@ add_definitions(
 
 include_directories(include/)
 
-add_executable(${PROJECT_NAME} main.cpp)
+add_executable(${PROJECT_NAME} main.cpp src/Backend.cpp)
 
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
   foreach(link_lib IN LISTS LIBRARY_LIST)

@@ -1,7 +1,14 @@
 #Project files
-[Bb]uild/
+[Bb]uild*/
 
 #local kdevelop config
 .kdev4/
 cuda-interpreter.kdev4
 CUDA-Runtime-Interpreter.kdev4
+
+#fatbin files
+example_prog/*.fatbin
+
+#link to llvm lib
+lib
+lib64

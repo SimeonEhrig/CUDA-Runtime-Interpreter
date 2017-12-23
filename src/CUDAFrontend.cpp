@@ -27,60 +27,22 @@
 #include <llvm/Support/TargetSelect.h>
 #include <llvm/Support/raw_ostream.h>
 #include <memory>
-#include <llvm/Bitcode/BitcodeWriter.h>
+
 #include <iostream> //necessary for executor, if the jited prgram has an iostream
 #include <llvm/Support/DynamicLibrary.h>
 
-#include <string>
-#include <llvm/Support/TargetRegistry.h>
-#include <libgen.h>
-
-#include "OrcJit.hpp"
+#include "Config.hpp"
+#include "CUDAFrontend.hpp"
+#include "FrontendUtil.hpp"
 #include "Backend.hpp"
-
-//if interpret is not enable, it will be generate an object file instead interpret the code
-#define INTERPRET 1
 
 using namespace clang;
 using namespace clang::driver;
 
-// This function isn't referenced outside its translation unit, but it
-// can't use the "static" keyword because its address is used for
-// GetMainExecutable (since some platforms don't support taking the
-// address of main, and some platforms can't implement GetMainExecutable
-// without being given the address of a function in the main executable).
-std::string getExecutablePath(const char *Argv0) {
-  // This just needs to be some symbol in the binary; C++ doesn't
-  // allow taking the address of ::main however.
-  void *mainAddr = (void*) (intptr_t) getExecutablePath;
-  return llvm::sys::fs::getMainExecutable(Argv0, mainAddr);
-}
-
-int main(int argc, const char **argv, char * const *envp) {
-  //=================input check and getting file information==================
-  if(argc < 3){
-    std::cout << "usage: [filename.cu] [kernel.fatbin]" << std::endl;
-    return 1;
-  }
-  
-  std::string sourceName = basename(const_cast<char *>(argv[1]));
-  std::size_t found_end = sourceName.rfind(".cu");
-  if(found_end == std::string::npos){
-    std::cout << "no .cu file found" << std::endl;
-    return 1;
-  }
-  std::string outputName = sourceName.substr(0, found_end);
-  
-  std::string fatbinPath = argv[2];
-  found_end = fatbinPath.rfind(".fatbin");
-  if(found_end == std::string::npos){
-    std::cout << "no .fatbin file found" << std::endl;
-    return 1;
-  }
-  
+int myFrontend::cuda(int argc, const char **argv, const std::string &outputName, const std::string &fatbinPath) {
   //===============================get main part===============================
-  void *mainAddr = (void*) (intptr_t) getExecutablePath;
-  std::string exePath = getExecutablePath(argv[0]);
+  void *mainAddr = (void*) (intptr_t) myFrontend::getExecutablePath;
+  std::string exePath = myFrontend::getExecutablePath(argv[0]);
   //===============================diagnostic options==========================
   IntrusiveRefCntPtr<DiagnosticOptions> diagOpts = new DiagnosticOptions();
   TextDiagnosticPrinter *diagClient =
@@ -98,7 +60,7 @@ int main(int argc, const char **argv, char * const *envp) {
 
   //=====================generate args for compilation (-cc1)==================
   Driver driver(exePath, triple.str(), diags);
-    driver.setTitle("clang interpreter");
+    driver.setTitle("clang cuda interpreter");
     driver.setCheckInputsExist(false);
   
 
@@ -111,9 +73,6 @@ int main(int argc, const char **argv, char * const *envp) {
   //but it also removes some steps in the cuda pipeline, which are necessary for interpret
   //also, if syntax only is use, there are to commands, one for the device and one for the host code
   //Args.push_back("-fsyntax-only"); 
-  
-  //"delete" fatbin path from imput
-  args[2] = "";
   
   //enable c++
   args.push_back("-fno-use-cxa-atexit"); //magic c++ flag :-/
@@ -152,6 +111,8 @@ int main(int argc, const char **argv, char * const *envp) {
   std::unique_ptr<CompilerInvocation> compilerInvocation(new CompilerInvocation);
 
   driver::ArgStringList nonConstCCArgs = CCArgs;
+  
+  
   
   //manipulate the path to the kernel fatbinary 
   nonConstCCArgs[nonConstCCArgs.size()-1] = fatbinPath.c_str();
@@ -195,9 +156,9 @@ int main(int argc, const char **argv, char * const *envp) {
   int res = 255;
   if (std::unique_ptr<llvm::Module> module = codeGenAction->takeModule()){ //module include program code in LLVM IR, Traget Trpile, function name an some more      
 #if INTERPRET == 0
-   res = genObjectFile(module, outputName);
+   res = myBackend::genObjectFile(module, "cu_" + outputName);
 #else
-   res = executeJIT(module);
+   res = myBackend::executeJIT(module);
 #endif
   }
   

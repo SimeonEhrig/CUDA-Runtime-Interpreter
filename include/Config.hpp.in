@@ -1,0 +1,5 @@
+//config header-file
+//contains configurations and paths (e.g. path to cuda-toolkit) -> will implemented later 
+
+//if interpret is not enable, it will be generate an object file instead interpret the code
+#define INTERPRET 1

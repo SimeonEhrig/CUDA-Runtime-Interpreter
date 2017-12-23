@@ -11,7 +11,6 @@ It's a prototype of an interpreter, which can interpret the host code of a CUDA 
 Tested with clang/llvm 5.0, 6.0 and CUDA 8.0.61
 
 ## Installation
-If you want to use own compiled libraries, goto to the next section. To build the interpreter with clang/llvm-libraries, which are installed via packet manager (e.g. dpkg), do the following steps.
 
 ```bash
   cd <path_to>/CUDA-Runtime-Interpreter
@@ -21,7 +20,7 @@ If you want to use own compiled libraries, goto to the next section. To build th
   make
 ```
 
-## Installation with own compiled clang/llvm-libraries
+### build with own compiled clang/llvm-libraries
 If you want to use own compiled clang/llvm-libraries, for example to debug the code, do the following steps.
 
 ```bash
@@ -53,10 +52,12 @@ The workflow of the cuda runtime interpreter based on the cuda compiler pipeline
 
 The first three steps are about device code generation. The generation of the fatbinary will be done before starting the interpreter. The device code generation can be performed with either clang's CUDA frontend or NVCC and the tools of NVIDIA's CUDA Toolkit. The interpreter replaces the 4th and 5th step.
 
-The interpreter implemented an alternative mode, which is generating an object file. The object file can be linked (ld) to an executable. This mode is just implemented to check if the LLVM module generation works as expected. Activate it by changing the define from `INTERPRET 1` to `INTERPRET 0`.
+The interpreter implemented an alternative mode, which is generating an object file. The object file can be linked (ld) to an executable. This mode is just implemented to check if the LLVM module generation works as expected. Activate it by changing the define from `INTERPRET 1` to `INTERPRET 0` in the build/config/Config.hpp.
+
+There is also a c++-intpreter mode for research purposes. You can use it via argument on application start (for more details, see next chapter).
 
 ## Execute an Example
-In the `example_prog` folder you can find four example source codes.
+In the `example_prog` folder you can find some example source codes.
 
 ### generating fatbinary
 
@@ -70,18 +71,43 @@ The last option is the most complicated way, but the best way, because it is the
 
 ### running interpreter
 
-Run the tests with cuda-interpeter and the two arguments as above:
+Run the tests with cuda-interpeter and the three or more arguments as above:
 
  [1] path to the source code in "example_prog"
-     - note: even for host-only code, use the file-ending .cu
+ 
+ 	 - note: needs the file ending .cu or .cpp 
      
  [2] path to the runtime .fatbin
-     - note: needs the file ending .fatbin, 
+ 
+     - note: needs the file ending .fatbin,
+     - the argument -fatbin is necessary -> later you can omitting it and the interpreter compile the device-code just in time, but in the moment, there isn't a implementation for a device jit 
      - note: a file is necessary, but if the program doesn't need a kernel, the content of the file will ignore
+
+ [3] arguments for clang compiler instance
+ 
+ 	- all arguments after the fatbin path will pass to the clang compilerInstance -> see all possible arguments with $ clang++ --help
 
 Example:
 ```bash
-  ./cuda-interpreter ../example_prog/hello.cu ../example_prog/runtime.fatbin
+  ./cuda-interpreter ../example_prog/hello.cu -fatbin ../example_prog/runtime.fatbin -v
 ```
 
-Note: As a prototype, the input is just static and barely checked yet.
+#### running the c++-interpreter frontend
+
+Run the tests with cuda-interpeter and the two or more arguments as above:
+
+ [1] the -cpp argument enable the c++-frontend 
+
+ [2] path to the source code in "example_prog"
+ 
+ 	 - note: needs the file ending .cpp 
+     
+
+ [3] arguments for clang compiler instance
+ 
+ 	- all arguments after the fatbin path will pass to the clang compilerInstance -> see all possible arguments with $ clang++ --help
+
+Example:
+```bash
+  ./cuda-interpreter -cpp ../example_prog/hello.cpp -v
+```

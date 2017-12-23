@@ -1,5 +1,3 @@
-#include "Backend.hpp"
-
 #include <clang/CodeGen/CodeGenAction.h>
 #include <clang/Basic/DiagnosticOptions.h>
 #include <clang/Driver/Compilation.h>
@@ -28,9 +26,10 @@
 #include <llvm/Support/TargetRegistry.h>
 #include <libgen.h>
 
+#include "Backend.hpp"
 #include "OrcJit.hpp"
 
-int executeJIT(std::unique_ptr<llvm::Module> &module){
+int myBackend::executeJIT(std::unique_ptr<llvm::Module> &module){
   LLVMInitializeX86TargetInfo();
   LLVMInitializeX86Target();
   LLVMInitializeX86TargetMC();
@@ -52,6 +51,7 @@ int executeJIT(std::unique_ptr<llvm::Module> &module){
   llvm::TargetMachine * targetMachine = Target->createTargetMachine(module->getTargetTriple(), "generic", "", TO, RM);
 
   llvm::orc::Orc_JIT orcJitExecuter(targetMachine);
+  //FIXME : add variable path to Config.hpp.in
   orcJitExecuter.setDynamicLibrary("/usr/local/cuda-8.0/lib64/libcudart.so");
   orcJitExecuter.addModule(std::move(module));
   auto mainSymbol = orcJitExecuter.findSymbol("main");
@@ -59,7 +59,7 @@ int executeJIT(std::unique_ptr<llvm::Module> &module){
   return mainFP(1, nullptr );
 }
 
-int genObjectFile(std::unique_ptr<llvm::Module> &module, std::string outputName){
+int myBackend::genObjectFile(std::unique_ptr<llvm::Module> &module, std::string outputName){
   LLVMInitializeX86TargetInfo();
   LLVMInitializeX86Target();
   LLVMInitializeX86TargetMC();

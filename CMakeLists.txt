@@ -53,9 +53,20 @@ add_definitions(
 -D__STDC_CONSTANT_MACROS
 )
 
-include_directories(include/)
+#generate config c++-header-file
+#contains configurations and system paths (e.g. cuda toolkit path)
+#if file already exists, it will not overwrite -> allow manual modifications 
+if(NOT EXISTS "${PROJECT_BINARY_DIR}/Config.hpp" )
+    configure_file (
+        "${PROJECT_SOURCE_DIR}/include/Config.hpp.in"
+        "${PROJECT_BINARY_DIR}/config/Config.hpp"
+        )
+endif()
 
-add_executable(${PROJECT_NAME} main.cpp src/Backend.cpp)
+include_directories(include/)
+include_directories(${PROJECT_BINARY_DIR}/config)
+
+add_executable(${PROJECT_NAME} src/Driver.cpp src/CUDAFrontend.cpp src/CPPFrontend.cpp src/FrontendUtil.cpp src/Backend.cpp)
 
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
   foreach(link_lib IN LISTS LIBRARY_LIST)

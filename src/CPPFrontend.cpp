@@ -39,7 +39,7 @@
 using namespace clang;
 using namespace clang::driver;
 
-int myFrontend::cpp(int argc, const char **argv, const std::string &outputName) {
+int myFrontend::cpp(int argc, const char **argv, const std::string &outputName, bool cppMode) {
   //===============================get main part===============================
   void *MainAddr = (void*) (intptr_t) myFrontend::getExecutablePath;
   std::string exePath = myFrontend::getExecutablePath(argv[0]);
@@ -70,9 +70,11 @@ int myFrontend::cpp(int argc, const char **argv, const std::string &outputName) 
   SmallVector<const char *, 16> args(argv, argv + argc);
   args.push_back("-fsyntax-only"); //only the syntax will checked -> no compilation
   
-  //enable c++
-  args.push_back("-fno-use-cxa-atexit"); //magic c++ flag :-/
-  driver.CCCIsCPP();
+  if(cppMode){
+    //enable c++
+    args.push_back("-fno-use-cxa-atexit"); //magic c++ flag :-/
+    driver.CCCIsCPP();
+  }
 
   std::unique_ptr<Compilation> compilation(driver.BuildCompilation(args));
   if (!compilation)
@@ -152,7 +154,7 @@ int myFrontend::cpp(int argc, const char **argv, const std::string &outputName) 
 #if INTERPRET == 0
    res = myBackend::genObjectFile(module, "cpp_" + outputName);
 #else
-   res = myBackend::executeJIT(module);
+   res = myBackend::executeJIT(std::move(module));
 #endif
   }
   

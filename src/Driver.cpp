@@ -13,9 +13,13 @@
  */
 void print_usage(){
     std::cout << std::endl 
-    << "Usage: cuda-interpreter [-cpp] source-file [-fatbin fatbinary-file] [clang-commands ...]" << std::endl << 
+    << "Usage: cuda-interpreter [mode] source-file [-fatbin fatbinary-file] [clang-commands ...]" << std::endl << 
     std::endl <<
-    "  -cpp              use cpp-interpreter instead cuda-interpreter" << std::endl <<
+    "  mode              choose the interpreter frontend" << std::endl <<
+    "     -c                c interpreter" << std::endl <<
+    "     -cpp              c++ interpreter" << std::endl <<
+    "     -cuda_c           cuda c interpreter" << std::endl <<
+    "     -cuda_cpp         cuda c++ interpreter" << std::endl <<
     "  -fatbin           path to fatbin of the source-file" << std::endl <<
     "                    at the moment necessary, if the cuda frontend will used" <<
     "  -clang-commands   pass clang argumente to the compiler instance -> see \"clang --help\"" << std::endl 
@@ -48,8 +52,21 @@ int main(int argc, char **argv) {
         return 0;
     }
     
+    std::string firstArg = argv[1];
+    //if true, use c++ language in the frontend, else c
+    bool cppMode = false;
+    
+    if(firstArg == "-c" || firstArg == "-cuda_c"){
+        cppMode = false;
+    }else if(firstArg == "-cpp" || firstArg == "-cuda_cpp"){
+        cppMode = true;
+    }else{
+        std::cerr << "unknown interpreter mode: " << firstArg << std::endl;
+        return 1;
+    }
+    
     //check, if c++ or cuda frontend will use
-    if(std::string(argv[1]) == "-cpp"){
+    if(firstArg == "-c" || firstArg == "-cpp"){
         std::cout << "use cpp interpreter" << std::endl;
         if(argc < 3){
             std::cerr << "not enough arguments" << std::endl;
@@ -59,9 +76,10 @@ int main(int argc, char **argv) {
         std::string sourceName;
         
         //check if the source is a .cpp-file
-        sourceName = checkSourceFile(argv[2], ".cpp");
+        std::string fileEnding = (cppMode) ? (".cpp") : (".c");
+        sourceName = checkSourceFile(argv[2], fileEnding);
         if(sourceName.empty()){
-            std::cerr << argv[2] << "is not a .cpp file" << std::endl;
+            std::cerr << argv[2] << " is not a " << fileEnding << " file" << std::endl;
             return 1;
         }
         
@@ -72,27 +90,32 @@ int main(int argc, char **argv) {
             newArgv[i] = argv[i+1];
         }
         
-        return myFrontend::cpp(argc-1, newArgv, sourceName);
+        return myFrontend::cpp(argc-1, newArgv, sourceName, cppMode);
     }else{
         std::cout << "use cuda interpreter" << std::endl;
+        if(argc < 3){
+            std::cerr << "not enough arguments" << std::endl;
+            return 1;
+        }
         
         std::string sourceName;
         std::string fatbinPath;
         
         //check if the source is a .cu or .cpp-file
-        sourceName = checkSourceFile(argv[1], ".cu");
+        std::string fileEnding = (cppMode) ? (".cpp") : (".c");
+        sourceName = checkSourceFile(argv[2], ".cu");
         if(sourceName.empty()){
-            sourceName = checkSourceFile(argv[1], ".cpp");
+            sourceName = checkSourceFile(argv[2], fileEnding);
             if(sourceName.empty()){
-                std::cerr << argv[1] << "is not a .cu or .cpp file" << std::endl;
+                std::cerr << argv[2] << " is not a .cu or " << fileEnding << " file" << std::endl;
                 return 1;
             }
         }
         
         //check if .fatbin-file is existing
-        if((argc > 2) && (std::string(argv[2]) == "-fatbin")){
-            if(argc > 3){
-                fatbinPath = argv[3];
+        if((argc > 3) && (std::string(argv[3]) == "-fatbin")){
+            if(argc > 4){
+                fatbinPath = argv[4];
                 if(checkSourceFile(fatbinPath, ".fatbin").empty()){
                     std::cerr << fatbinPath << " is no .fatbin file." << std::endl;
                     return 1;
@@ -111,16 +134,20 @@ int main(int argc, char **argv) {
         //remove -fatbin <file>.fatbin from argument list
         //add -x cuda to compile .cpp-file with the cuda-modus
         //structur: <path>/cuda-interpreter -x cuda <path>/<file>.[cu|cpp] <clang-arguments ...>
-        const char* newArgv[argc];
+        const char* newArgv[argc-1];
         newArgv[0] = argv[0];
         newArgv[1] = "-x";
         newArgv[2] = "cuda";
-        newArgv[3] = argv[1];
+        newArgv[3] = argv[2];
         
         for(int i = 4; i < argc; ++i){
-            newArgv[i] = argv[i];
+            newArgv[i] = argv[i+1];
         }
         
-        return myFrontend::cuda(argc, newArgv, sourceName, fatbinPath);
+        for(int i = 0; i < argc-1; ++i){
+            std::cout << newArgv[i] << std::endl;
+        }
+        
+        return myFrontend::cuda(argc, newArgv, sourceName, fatbinPath, cppMode);
     }
 }

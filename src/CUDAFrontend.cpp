@@ -39,7 +39,7 @@
 using namespace clang;
 using namespace clang::driver;
 
-int myFrontend::cuda(int argc, const char **argv, const std::string &outputName, const std::string &fatbinPath) {
+int myFrontend::cuda(int argc, const char **argv, const std::string &outputName, const std::string &fatbinPath, bool cppMode) {
   //===============================get main part===============================
   void *mainAddr = (void*) (intptr_t) myFrontend::getExecutablePath;
   std::string exePath = myFrontend::getExecutablePath(argv[0]);
@@ -74,9 +74,11 @@ int myFrontend::cuda(int argc, const char **argv, const std::string &outputName,
   //also, if syntax only is use, there are to commands, one for the device and one for the host code
   //Args.push_back("-fsyntax-only"); 
   
-  //enable c++
-  args.push_back("-fno-use-cxa-atexit"); //magic c++ flag :-/
-  driver.CCCIsCPP();
+  if(cppMode){
+    //enable c++
+    args.push_back("-fno-use-cxa-atexit"); //magic c++ flag :-/
+    driver.CCCIsCPP();
+  }
 
   std::unique_ptr<Compilation> compilation(driver.BuildCompilation(args));
   if (!compilation)
@@ -156,9 +158,9 @@ int myFrontend::cuda(int argc, const char **argv, const std::string &outputName,
   int res = 255;
   if (std::unique_ptr<llvm::Module> module = codeGenAction->takeModule()){ //module include program code in LLVM IR, Traget Trpile, function name an some more      
 #if INTERPRET == 0
-   res = myBackend::genObjectFile(module, "cu_" + outputName);
+   res = myBackend::genObjectFile(std::move(module), "cu_" + outputName);
 #else
-   res = myBackend::executeJIT(module);
+   res = myBackend::executeJIT(std::move(module));
 #endif
   }
   

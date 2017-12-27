@@ -29,7 +29,7 @@
 #include "Backend.hpp"
 #include "OrcJit.hpp"
 
-int myBackend::executeJIT(std::unique_ptr<llvm::Module> &module){
+int myBackend::executeJIT(std::unique_ptr<llvm::Module> module){
   LLVMInitializeX86TargetInfo();
   LLVMInitializeX86Target();
   LLVMInitializeX86TargetMC();
@@ -59,7 +59,7 @@ int myBackend::executeJIT(std::unique_ptr<llvm::Module> &module){
   return mainFP(1, nullptr );
 }
 
-int myBackend::genObjectFile(std::unique_ptr<llvm::Module> &module, std::string outputName){
+int myBackend::genObjectFile(std::unique_ptr<llvm::Module> module, std::string outputName){
   LLVMInitializeX86TargetInfo();
   LLVMInitializeX86Target();
   LLVMInitializeX86TargetMC();

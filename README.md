@@ -71,32 +71,34 @@ The last option is the most complicated way, but the best way, because it is the
 
 ### running interpreter
 
-Run the tests with cuda-interpeter and the three or more arguments as above:
+Run the tests with cuda-interpeter and the four or more arguments as above:
 
- [1] path to the source code in "example_prog"
+ [1] set -cuda_c or -cuda_cpp as first argument to enable the cuda c- or c++-frontend 
+
+ [2] path to the source code in "example_prog"
  
  	 - note: needs the file ending .cu or .cpp 
      
- [2] path to the runtime .fatbin
+ [3] path to the runtime .fatbin
  
      - note: needs the file ending .fatbin,
      - the argument -fatbin is necessary -> later you can omitting it and the interpreter compile the device-code just in time, but in the moment, there isn't a implementation for a device jit 
      - note: a file is necessary, but if the program doesn't need a kernel, the content of the file will ignore
 
- [3] arguments for clang compiler instance
+ [4] arguments for clang compiler instance
  
  	- all arguments after the fatbin path will pass to the clang compilerInstance -> see all possible arguments with $ clang++ --help
 
 Example:
 ```bash
-  ./cuda-interpreter ../example_prog/hello.cu -fatbin ../example_prog/runtime.fatbin -v
+  ./cuda-interpreter -cuda_cpp ../example_prog/hello.cu -fatbin ../example_prog/runtime.fatbin -v
 ```
 
 #### running the c++-interpreter frontend
 
 Run the tests with cuda-interpeter and the two or more arguments as above:
 
- [1] the -cpp argument enable the c++-frontend 
+ [1] set -c or -cpp as first argument to enable the c- or c++-frontend 
 
  [2] path to the source code in "example_prog"
  

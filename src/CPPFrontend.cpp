@@ -152,7 +152,7 @@ int myFrontend::cpp(int argc, const char **argv, const std::string &outputName, 
   int res = 255;
   if (std::unique_ptr<llvm::Module> module = codeGenAction->takeModule()){ //module include program code in LLVM IR, Traget Trpile, function name an some more      
 #if INTERPRET == 0
-   res = myBackend::genObjectFile(module, "cpp_" + outputName);
+   res = myBackend::genObjectFile(std::move(module), "cpp_" + outputName);
 #else
    res = myBackend::executeJIT(std::move(module));
 #endif

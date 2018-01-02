@@ -144,10 +144,6 @@ int main(int argc, char **argv) {
             newArgv[i] = argv[i+1];
         }
         
-        for(int i = 0; i < argc-1; ++i){
-            std::cout << newArgv[i] << std::endl;
-        }
-        
         return myFrontend::cuda(argc, newArgv, sourceName, fatbinPath, cppMode);
     }
 }

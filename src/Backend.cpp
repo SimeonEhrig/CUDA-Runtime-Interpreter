@@ -44,8 +44,8 @@ int myBackend::executeJIT(std::unique_ptr<llvm::Module> module){
     return 1;
   }
   
-  llvm::Optional<llvm::Reloc::Model>  RM = llvm::Optional<llvm::Reloc::Model>();
-    
+  llvm::Optional<llvm::Reloc::Model>  RM = llvm::Optional<llvm::Reloc::Model>(llvm::Reloc::Model::PIC_);
+  
   llvm::TargetOptions TO = llvm::TargetOptions();
   
   llvm::TargetMachine * targetMachine = Target->createTargetMachine(module->getTargetTriple(), "generic", "", TO, RM);
@@ -74,7 +74,7 @@ int myBackend::genObjectFile(std::unique_ptr<llvm::Module> module, std::string o
     return 1;
   }
   
-  llvm::Optional<llvm::Reloc::Model>  RM = llvm::Optional<llvm::Reloc::Model>();
+  llvm::Optional<llvm::Reloc::Model>  RM = llvm::Optional<llvm::Reloc::Model>(llvm::Reloc::Model::PIC_);
     
   llvm::TargetOptions TO = llvm::TargetOptions();
   

@@ -63,8 +63,8 @@ In the `example_prog` folder you can find some example source codes.
 
 Before you can use the interpreter, you have to precompile an fatbinary. The fatbinary is the compiled device-code in an "function-handle", which allows an embedding in the host. There three options to generate the fatbinary.
 
-1. Use the generate\_nvcc\_fatbin.sh script in the example_prog folder and generate with NVIDIAs nvcc a fatbin. 
-2. Use the generate\_clang\_fatbin.sh script in the example_prog folder and generate with clang/llvm and NVIDIAs tools a fatbin.
+1. Run `./generate_nvcc_fatbin.sh <filename>.cu` in the example_prog folder and generate a `nvcc_<filename>.fatbin` file with NVIDIAs nvcc.
+2. Run `./generate_clang_fatbin.sh <filename>.cu` in the example_prog folder and generate a `clang_<filename>.fatbin` file with clang/llvm and NVIDIAs tools.
 3. Run the command `clang++ -### runtime.cu -o runtime -lcudart_static -L/usr/local/cuda-8.0/lib64 -ldl -lrt -pthread` and you get information about the clang and a list of 5 commands. Use the first three commands, to generate a fatbinary. If you do this, you have to change the input- and output-paths of the commands or you have to copy the fatbin from the /tmp folder.
 
 The last option is the most complicated way, but the best way, because it is the closest way to the original implementation of the clang frontend.

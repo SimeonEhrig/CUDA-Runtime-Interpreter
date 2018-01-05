@@ -8,3 +8,5 @@
 //
 //write debug information of the backend on the console
 #define CUI_DEBUG_BACKEND 0
+//write the object code in a file, which is generated during the jit process
+#define CUI_DEBUG_JIT_OBJ 0

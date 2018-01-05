@@ -49,8 +49,8 @@ int myBackend::executeJIT(std::unique_ptr<llvm::Module> module){
   llvm::TargetOptions TO = llvm::TargetOptions();
   
   llvm::TargetMachine * targetMachine = Target->createTargetMachine(module->getTargetTriple(), "generic", "", TO, RM);
-
-  llvm::orc::Orc_JIT orcJitExecuter(targetMachine);
+      
+  myBackend::OrcJIT orcJitExecuter(targetMachine);
   //FIXME : add variable path to Config.hpp.in
   orcJitExecuter.setDynamicLibrary("/usr/local/cuda-8.0/lib64/libcudart.so");
   orcJitExecuter.addModule(std::move(module));

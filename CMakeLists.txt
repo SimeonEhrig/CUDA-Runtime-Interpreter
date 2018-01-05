@@ -66,7 +66,7 @@ endif()
 include_directories(include/)
 include_directories(${PROJECT_BINARY_DIR}/config)
 
-add_executable(${PROJECT_NAME} src/Driver.cpp src/CUDAFrontend.cpp src/CPPFrontend.cpp src/FrontendUtil.cpp src/Backend.cpp)
+add_executable(${PROJECT_NAME} src/Driver.cpp src/CUDAFrontend.cpp src/CPPFrontend.cpp src/FrontendUtil.cpp src/OrcJit.cpp src/Backend.cpp)
 
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
   foreach(link_lib IN LISTS LIBRARY_LIST)

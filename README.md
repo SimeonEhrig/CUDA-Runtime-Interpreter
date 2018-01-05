@@ -52,11 +52,16 @@ The workflow of the cuda runtime interpreter based on the cuda compiler pipeline
 
 The first three steps are about device code generation. The generation of the fatbinary will be done before starting the interpreter. The device code generation can be performed with either clang's CUDA frontend or NVCC and the tools of NVIDIA's CUDA Toolkit. The interpreter replaces the 4th and 5th step.
 
-The interpreter implemented an alternative mode, which is generating an object file. The object file can be linked (ld) to an executable. This mode is just implemented to check if the LLVM module generation works as expected. Activate it by changing the define from `INTERPRET 1` to `INTERPRET 0` in the build/config/Config.hpp.
+### Debug output options
 
-There is also a c++-intpreter mode for research purposes. You can use it via argument on application start (for more details, see next chapter).
+There are some options to get out information from the different stages of the interpreter process (e.g LLVM IR Code, Assembler ...). In `<build>/config/Config.hpp` you can modify some `#define` to change the output properties. Please note, the changes will be effective after recompiling.
 
-## Execute an Example
+A special case is `#define CUI_INTERPRET`. It changes the backend. If it is defined with `#define CUI_INTERPRET 1`, the interpreter use the JIT-Backend. If `CUI_INTERPRET` has the value 0, it will generate an object file. The object file can be linked (ld) to an executable.
+
+* CUI_DEBUG_BACKEND [0|1] if the value is 1, the llvm::DebugFlag will be enabled and all debug information of the backend will be written on the console (independent of CUI_INTERPRET)
+
+
+## Execute an example
 In the `example_prog` folder you can find some example source codes.
 
 ### generating fatbinary

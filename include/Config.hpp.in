@@ -2,4 +2,9 @@
 //contains configurations and paths (e.g. path to cuda-toolkit) -> will implemented later 
 
 //if interpret is not enable, it will be generate an object file instead interpret the code
-#define INTERPRET 1
+#define CUI_INTERPRET 1
+
+//options to write additional information of the compiler instances on the console or in a file
+//
+//write debug information of the backend on the console
+#define CUI_DEBUG_BACKEND 0

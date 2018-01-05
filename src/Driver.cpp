@@ -2,6 +2,9 @@
 #include <string>
 #include <libgen.h>
 
+#include <llvm/Support/Debug.h>
+
+#include "Config.hpp"
 #include "CUDAFrontend.hpp"
 #include "CPPFrontend.hpp"
 
@@ -51,6 +54,10 @@ int main(int argc, char **argv) {
         print_usage();
         return 0;
     }
+    
+#if CUI_DEBUG_BACKEND == 1
+    ::llvm::DebugFlag = true;
+#endif
     
     std::string firstArg = argv[1];
     //if true, use c++ language in the frontend, else c

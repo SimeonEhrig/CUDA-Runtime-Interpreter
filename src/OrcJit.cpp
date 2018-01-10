@@ -21,10 +21,18 @@
 
 myBackend::OrcJIT::OrcJIT(llvm::TargetMachine * targetMachine) 
                     :  TM(targetMachine), DL(TM->createDataLayout()),
+                    notifyObjectLoaded(*this),
+#if CUI_DEBUG_JIT_INFO == 1
+                    ObjectLayer([this]() { return std::make_shared<llvm::SectionMemoryManager>(); }, notifyObjectLoaded),
+#else
                     ObjectLayer([]() { return std::make_shared<llvm::SectionMemoryManager>(); }),
+#endif
                     DumpObjectsLayer(ObjectLayer, &myBackend::OrcJIT::dumpObject),
                     CompilerLayer(DumpObjectsLayer, llvm::orc::SimpleCompiler(*TM)){
     llvm::sys::DynamicLibrary::LoadLibraryPermanently(nullptr);
+#if CUI_DEBUG_JIT_INFO == 1
+    GdbEventListener = llvm::JITEventListener::createGDBRegistrationListener();
+#endif
 }
         
 bool myBackend::OrcJIT::setDynamicLibrary(std::string path){
@@ -74,3 +82,10 @@ myBackend::OrcJIT::ObjectPtr myBackend::OrcJIT::dumpObject(myBackend::OrcJIT::Ob
 #endif
     return Obj;
 }
+
+void myBackend::OrcJIT::NotifyObjectLoaded::operator()(llvm::orc::RTDyldObjectLinkingLayerBase::ObjHandleT, const llvm::orc::RTDyldObjectLinkingLayerBase::ObjectPtr& obj, const llvm::LoadedObjectInfo& info)
+{
+    const auto &fixedInfo = static_cast<const llvm::RuntimeDyld::LoadedObjectInfo &>(info);
+    m_jit.GdbEventListener->NotifyObjectEmitted(*obj->getBinary(), fixedInfo);
+}
+

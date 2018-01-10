@@ -60,6 +60,10 @@ A special case is `#define CUI_INTERPRET`. It changes the backend. If it is defi
 
 * CUI_DEBUG_BACKEND [0|1] if the value is 1, the llvm::DebugFlag will be enabled and all debug information of the backend will be written on the console (independent of CUI_INTERPRET)
 * CUI_DEBUG_JIT_OBJ [0|1] if the value is 1, the jit backend write the object code in a file, which is generated during the jit process (only if CUI_INTERPRET is 1)
+* CUI_DEBUG_JIT_INFO [0|1] if the value is 1, add debug information to the jited code and allow debugging with the gdb (only if CUI_INTERPRET is 1)
+  * notice: to add debug information to the jited code, you also have to set the flag -g at start of the cuda-interpreter
+  * example: ./cuda-interpreter `-cuda_cpp <source>.cu -fatbin <source>.fatbin -g`
+
 
 ## Execute an example
 In the `example_prog` folder you can find some example source codes.

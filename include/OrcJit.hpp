@@ -9,14 +9,30 @@
 #include <llvm/ExecutionEngine/Orc/ObjectTransformLayer.h>
 #include "llvm/IR/DataLayout.h"
 #include "llvm/Target/TargetMachine.h"
+#include <llvm/ExecutionEngine/JITEventListener.h>
 #include <string>
 
 namespace myBackend{
     
     class OrcJIT {
     private:
+        //add debug information to the jited code so you can use the gdb to debug the code
+        //source: https://github.com/weliveindetail/JitFromScratch/commit/d4b6778d8d462299674e103d8ecdec1140a45cfe
+        struct NotifyObjectLoaded {
+            NotifyObjectLoaded(myBackend::OrcJIT& jit) : m_jit(jit) {}
+            
+            void operator()(llvm::orc::RTDyldObjectLinkingLayerBase::ObjHandleT,
+                            const llvm::orc::RTDyldObjectLinkingLayerBase::ObjectPtr &obj,
+                            const llvm::LoadedObjectInfo &info);
+        private:
+            myBackend::OrcJIT &m_jit;
+        };
+        
         using ObjectPtr = std::shared_ptr<llvm::object::OwningBinary<llvm::object::ObjectFile>>;
         static ObjectPtr dumpObject(ObjectPtr Obj);
+        
+        NotifyObjectLoaded notifyObjectLoaded;
+        llvm::JITEventListener *GdbEventListener;
         
         std::unique_ptr<llvm::TargetMachine> TM;
         const llvm::DataLayout DL;
@@ -24,6 +40,7 @@ namespace myBackend{
         llvm::orc::ObjectTransformLayer<decltype(ObjectLayer),
                                         decltype(&OrcJIT::dumpObject)> DumpObjectsLayer;
         llvm::orc::IRCompileLayer<decltype(DumpObjectsLayer), llvm::orc::SimpleCompiler> CompilerLayer;
+        
         
     public:
         using ModuleHandle = decltype(CompilerLayer)::ModuleHandleT;

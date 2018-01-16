@@ -25,7 +25,7 @@ project(${PROJECT_NAME})
 
 #set MY_LLVM_BASE_DIR to use self compiled clang/llvm libraries
 if(NOT MY_LLVM_BASE_DIR)
-    find_package(LLVM REQUIRED CONFIG)
+    find_package(LLVM 5.0 REQUIRED CONFIG)
 else()
     set(LLVM_DIR ${MY_LLVM_BASE_DIR}/lib/cmake/llvm)
     set(LLVM_INCLUDE_DIRS ${MY_LLVM_BASE_DIR}/include)

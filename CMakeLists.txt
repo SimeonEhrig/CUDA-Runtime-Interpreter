@@ -250,3 +250,16 @@ target_link_libraries(${PROJECT_NAME} clang)
 message(STATUS "User selected librarys = ${LIBRARY_LIST}")
 message(STATUS "User selected components = ${COMPONENT_LIST}")
 message(STATUS " = ${llvm_libs}")
+
+############################################################
+#   install prototype and scripts
+############################################################
+
+install(TARGETS ${PROJECT_NAME}
+    RUNTIME DESTINATION bin
+)
+install(FILES
+    ${PROJECT_SOURCE_DIR}/example_prog/generate_clang_kernel.sh
+    ${PROJECT_SOURCE_DIR}/example_prog/generate_nvcc_fatbin.sh
+    DESTINATION bin
+)

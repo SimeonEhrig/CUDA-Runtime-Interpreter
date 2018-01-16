@@ -32,7 +32,7 @@ else()
     set(LLVM_LIBRARY_DIRS ${MY_LLVM_BASE_DIR}/lib)
 endif()
 
-message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
+message(STATUS "Found LLVM: ${LLVM_PACKAGE_VERSION}")
 message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
 
 include_directories(${LLVM_INCLUDE_DIRS})
@@ -52,6 +52,8 @@ add_definitions(
 -D__STDC_LIMIT_MACROS
 -D__STDC_CONSTANT_MACROS
 )
+
+find_package(CUDA REQUIRED)
 
 #generate config c++-header-file
 #contains configurations and system paths (e.g. cuda toolkit path)

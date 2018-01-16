@@ -25,6 +25,7 @@
 #include <llvm/Support/TargetRegistry.h>
 #include <libgen.h>
 
+#include "Config.hpp"
 #include "Backend.hpp"
 #include "OrcJit.hpp"
 
@@ -50,8 +51,7 @@ int myBackend::executeJIT(std::shared_ptr<llvm::Module> module){
   llvm::TargetMachine * targetMachine = Target->createTargetMachine(module->getTargetTriple(), "generic", "", TO, RM);
       
   myBackend::OrcJIT orcJitExecuter(targetMachine);
-  //FIXME : add variable path to Config.hpp.in
-  orcJitExecuter.setDynamicLibrary("/usr/local/cuda-8.0/lib64/libcudart.so");
+  orcJitExecuter.setDynamicLibrary(std::string(CUI_CUDA_TOOLKIT_PATH) + "/lib64/libcudart.so");
   orcJitExecuter.addModule(module);
   
   return orcJitExecuter.runMain(1, nullptr);

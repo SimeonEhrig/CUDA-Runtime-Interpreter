@@ -25,7 +25,7 @@ project(${PROJECT_NAME})
 
 #set MY_LLVM_BASE_DIR to use self compiled clang/llvm libraries
 if(NOT MY_LLVM_BASE_DIR)
-    find_package(LLVM REQUIRED CONFIG)
+    find_package(LLVM 5.0 REQUIRED CONFIG)
 else()
     set(LLVM_DIR ${MY_LLVM_BASE_DIR}/lib/cmake/llvm)
     set(LLVM_INCLUDE_DIRS ${MY_LLVM_BASE_DIR}/include)
@@ -250,3 +250,16 @@ target_link_libraries(${PROJECT_NAME} clang)
 message(STATUS "User selected librarys = ${LIBRARY_LIST}")
 message(STATUS "User selected components = ${COMPONENT_LIST}")
 message(STATUS " = ${llvm_libs}")
+
+############################################################
+#   install prototype and scripts
+############################################################
+
+install(TARGETS ${PROJECT_NAME}
+    RUNTIME DESTINATION bin
+)
+install(FILES
+    ${PROJECT_SOURCE_DIR}/example_prog/generate_clang_kernel.sh
+    ${PROJECT_SOURCE_DIR}/example_prog/generate_nvcc_fatbin.sh
+    DESTINATION bin
+)

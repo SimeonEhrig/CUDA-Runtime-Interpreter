@@ -41,6 +41,9 @@ namespace myBackend{
                                         decltype(&OrcJIT::dumpObject)> DumpObjectsLayer;
         llvm::orc::IRCompileLayer<decltype(DumpObjectsLayer), llvm::orc::SimpleCompiler> CompilerLayer;
         
+        std::shared_ptr<llvm::Module> m_module;
+        
+        int runCUDAStaticCtorDtorOnce(bool init);
         
     public:
         using ModuleHandle = decltype(CompilerLayer)::ModuleHandleT;
@@ -50,9 +53,17 @@ namespace myBackend{
         llvm::TargetMachine &getTargetMachine() { return *TM; }
         bool setDynamicLibrary(std::string path);
         
-        ModuleHandle addModule(std::unique_ptr<llvm::Module> M);
+        ModuleHandle addModule(std::shared_ptr<llvm::Module> M);
         llvm::JITSymbol findSymbol(const std::string Name);
         void removeModule(ModuleHandle H);
+        
+        //run cuda ctor -> main() -> cuda dtor
+        //attention: argc = 1 + sizeof(argv)
+        int runMain(int argc, char** argv);
+        //regist cuda kernels and cuda globals
+        int runCUDAStaticInitializersOnce(){return runCUDAStaticCtorDtorOnce(true);}
+        //unregister cuda kernels
+        int runCUDAStaticfinalizersOnce(){return runCUDAStaticCtorDtorOnce(false);}
     };
     
 } //namespace llvm

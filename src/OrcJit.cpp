@@ -17,6 +17,10 @@
 #include "llvm/Target/TargetMachine.h"
 #include <string>
 #include <iostream>
+#include <llvm/Support/DynamicLibrary.h>
+#include <llvm/IR/Constants.h>
+
+#include <llvm/ExecutionEngine/Orc/ExecutionUtils.h>
 
 
 myBackend::OrcJIT::OrcJIT(llvm::TargetMachine * targetMachine) 
@@ -45,7 +49,8 @@ bool myBackend::OrcJIT::setDynamicLibrary(std::string path){
     return true;
 }
 
-myBackend::OrcJIT::ModuleHandle myBackend::OrcJIT::addModule(std::unique_ptr<llvm::Module> M){
+myBackend::OrcJIT::ModuleHandle myBackend::OrcJIT::addModule(std::shared_ptr<llvm::Module> M){
+    m_module = M;
     auto Resolver = llvm::orc::createLambdaResolver(
         [&](const std::string &Name) {
             if (auto Sym = CompilerLayer.findSymbol(Name, false))
@@ -58,13 +63,14 @@ myBackend::OrcJIT::ModuleHandle myBackend::OrcJIT::addModule(std::unique_ptr<llv
             return llvm::JITSymbol(nullptr);
         });
             
-    return llvm::cantFail(CompilerLayer.addModule(std::move(M), std::move(Resolver)));
+    return llvm::cantFail(CompilerLayer.addModule(M, std::move(Resolver)));
 }
 
 llvm::JITSymbol myBackend::OrcJIT::findSymbol(const std::string Name) {
     std::string MangledName;
-    llvm::raw_string_ostream MangledNameStream(MangledName);    llvm::Mangler::getNameWithPrefix(MangledNameStream, Name, DL);
-    return CompilerLayer.findSymbol(MangledNameStream.str(), true);
+    llvm::raw_string_ostream MangledNameStream(MangledName);    
+    llvm::Mangler::getNameWithPrefix(MangledNameStream, Name, DL);
+    return CompilerLayer.findSymbol(MangledNameStream.str(), false);
 }
 
 void myBackend::OrcJIT::removeModule(ModuleHandle H) {
@@ -89,3 +95,42 @@ void myBackend::OrcJIT::NotifyObjectLoaded::operator()(llvm::orc::RTDyldObjectLi
     m_jit.GdbEventListener->NotifyObjectEmitted(*obj->getBinary(), fixedInfo);
 }
 
+//find and run cuda ctor and dtor
+//see __libc_csu_init and __libc_csu_fini (https://eli.thegreenplace.net/2012/08/13/how-statically-linked-programs-run-on-linux)
+int myBackend::OrcJIT::runCUDAStaticCtorDtorOnce(bool init)
+{
+    std::string fName;
+    if(init){
+        fName = "__cuda_module_ctor";
+    }else{
+        fName = "__cuda_module_dtor";
+    }
+    
+    llvm::JITSymbol sym = findSymbol(fName);
+    if(sym.getAddress().get() == 0){
+        return 1;
+    }
+    
+    void (*ctorFP)() = (void (*)())(uintptr_t)sym.getAddress().get();
+    ctorFP();
+    
+    return 0;
+}
+
+int myBackend::OrcJIT::runMain(int argc, char ** argv)
+{
+  if(runCUDAStaticInitializersOnce()){
+    llvm::errs() << "CUDA global ctor failed\n";
+    return 1;
+  }
+  
+  auto mainSymbol = findSymbol("main");
+  int (*mainFP)(int, char**) = (int (*)(int, char**))(uintptr_t)mainSymbol.getAddress().get();
+  int res = mainFP(argc, argv);
+  
+  if(runCUDAStaticfinalizersOnce()){
+    llvm::errs() << "CUDA global dtor failed\n";
+    return 1;
+  }
+  return res;
+}

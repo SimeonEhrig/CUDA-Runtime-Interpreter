@@ -20,7 +20,6 @@
 #include <memory>
 #include <llvm/Bitcode/BitcodeWriter.h>
 #include <iostream> //necessary for executor, if the jited prgram has an iostream
-#include <llvm/Support/DynamicLibrary.h>
 
 #include <string>
 #include <llvm/Support/TargetRegistry.h>
@@ -29,7 +28,7 @@
 #include "Backend.hpp"
 #include "OrcJit.hpp"
 
-int myBackend::executeJIT(std::unique_ptr<llvm::Module> module){
+int myBackend::executeJIT(std::shared_ptr<llvm::Module> module){
   LLVMInitializeX86TargetInfo();
   LLVMInitializeX86Target();
   LLVMInitializeX86TargetMC();
@@ -53,13 +52,13 @@ int myBackend::executeJIT(std::unique_ptr<llvm::Module> module){
   myBackend::OrcJIT orcJitExecuter(targetMachine);
   //FIXME : add variable path to Config.hpp.in
   orcJitExecuter.setDynamicLibrary("/usr/local/cuda-8.0/lib64/libcudart.so");
-  orcJitExecuter.addModule(std::move(module));
-  auto mainSymbol = orcJitExecuter.findSymbol("main");
-  int (*mainFP)(int, char**) = (int (*)(int, char**))(uintptr_t)mainSymbol.getAddress().get();
-  return mainFP(1, nullptr );
+  orcJitExecuter.addModule(module);
+  
+  return orcJitExecuter.runMain(1, nullptr);
 }
 
-int myBackend::genObjectFile(std::unique_ptr<llvm::Module> module, std::string outputName){
+
+int myBackend::genObjectFile(std::shared_ptr<llvm::Module> module, std::string outputName){
   LLVMInitializeX86TargetInfo();
   LLVMInitializeX86Target();
   LLVMInitializeX86TargetMC();

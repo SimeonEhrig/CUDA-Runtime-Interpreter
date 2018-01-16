@@ -2,8 +2,8 @@
 It's a prototype of an interpreter, which can interpret the host code of a CUDA program, written with the runtime API. The interpreter uses source code files and fatbinray files as input.
 
 ## Dependencies
-- clang-dev
-- llvm-dev
+- clang-dev >= 5.0
+- llvm-dev >= 5.0
 - cuda Toolkit
 - cmake 2.8.8
 - zlib1g-dev

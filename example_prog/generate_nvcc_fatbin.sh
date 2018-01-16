@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 if [ $# -eq 0 ]
   then
     echo "usage: ./generate_clang_kernel.sh <file>.cu"

@@ -259,7 +259,8 @@ install(TARGETS ${PROJECT_NAME}
     RUNTIME DESTINATION bin
 )
 install(FILES
-    ${PROJECT_SOURCE_DIR}/example_prog/generate_clang_kernel.sh
+    ${PROJECT_SOURCE_DIR}/example_prog/generate_clang_fatbin.sh
     ${PROJECT_SOURCE_DIR}/example_prog/generate_nvcc_fatbin.sh
     DESTINATION bin
+    PERMISSIONS WORLD_EXECUTE
 )

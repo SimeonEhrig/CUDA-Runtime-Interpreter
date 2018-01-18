@@ -23,9 +23,10 @@ RUN        apt-get update \
               zlib1g-dev \
            && rm -rf /var/lib/apt/lists/*
 
+
 COPY       . /root/cri
 
-RUN        mkdir -p /root/build \
+RUN mkdir -p /root/build \
            && cd /root/build \
            && cmake ../cri \
            && make -j2 \

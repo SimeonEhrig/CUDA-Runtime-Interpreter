@@ -13,6 +13,6 @@
 //add debug information to the jited code and allow debugging with the gdb (also need the flag -g as argument at start of the cuda-interpreter)
 #define CUI_DEBUG_JIT_INFO 1
 
-//path of the current cuda installation
+//runtime library of of the current cuda installation
 //necessary for automatic libcudart.so load 
-#define CUI_CUDA_TOOLKIT_PATH "@CUDA_TOOLKIT_ROOT_DIR@"
+#define CUI_CUDA_RT_LIBRARY "@CUDA_CUDART_LIBRARY@"

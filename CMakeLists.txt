@@ -54,6 +54,11 @@ add_definitions(
 )
 
 find_package(CUDA REQUIRED)
+message(CUDART: ${CUDA_CUDART_LIBRARY})
+
+if(NOT CUDA_CUDART_LIBRARY)
+    message(WARNING "CUDA Runtime Library (shared) not found!")
+endif()
 
 #generate config c++-header-file
 #contains configurations and system paths (e.g. cuda toolkit path)

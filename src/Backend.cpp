@@ -51,7 +51,7 @@ int myBackend::executeJIT(std::shared_ptr<llvm::Module> module){
   llvm::TargetMachine * targetMachine = Target->createTargetMachine(module->getTargetTriple(), "generic", "", TO, RM);
       
   myBackend::OrcJIT orcJitExecuter(targetMachine);
-  orcJitExecuter.setDynamicLibrary(std::string(CUI_CUDA_TOOLKIT_PATH) + "/lib64/libcudart.so");
+  orcJitExecuter.setDynamicLibrary(std::string(CUI_CUDA_RT_LIBRARY));
   orcJitExecuter.addModule(module);
   
   return orcJitExecuter.runMain(1, nullptr);

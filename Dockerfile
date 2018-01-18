@@ -1,4 +1,4 @@
-FROM       ubuntu:bionic
+FROM       nvidia/cuda:8.0-devel
 
 # general environment for docker
 ENV        DEBIAN_FRONTEND=noninteractive \
@@ -9,16 +9,16 @@ RUN        apt-get update \
               build-essential \
               ca-certificates \
               curl \
-              clang \
+              clang-3.8 \
+              clang-5.0 \
               cmake \
               git \
               pkg-config \
               libc6-dev \
-              libclang-dev \
+              libclang-5.0-dev \
               libedit-dev \
-              llvm-dev \
+              llvm-5.0-dev \
               lsb-release \
-              nvidia-cuda-toolkit \
               wget \
               zlib1g-dev \
            && rm -rf /var/lib/apt/lists/*

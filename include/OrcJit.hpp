@@ -28,6 +28,8 @@ namespace myBackend{
             myBackend::OrcJIT &m_jit;
         };
         
+        bool m_cudaMode;
+        
         using ObjectPtr = std::shared_ptr<llvm::object::OwningBinary<llvm::object::ObjectFile>>;
         static ObjectPtr dumpObject(ObjectPtr Obj);
         
@@ -48,7 +50,7 @@ namespace myBackend{
     public:
         using ModuleHandle = decltype(CompilerLayer)::ModuleHandleT;
         
-        OrcJIT(llvm::TargetMachine * targetMachine);
+        OrcJIT(llvm::TargetMachine * targetMachine, bool cudaMode);
         
         llvm::TargetMachine &getTargetMachine() { return *TM; }
         bool setDynamicLibrary(std::string path);

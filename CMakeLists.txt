@@ -30,6 +30,7 @@ else()
     set(LLVM_DIR ${MY_LLVM_BASE_DIR}/lib/cmake/llvm)
     set(LLVM_INCLUDE_DIRS ${MY_LLVM_BASE_DIR}/include)
     set(LLVM_LIBRARY_DIRS ${MY_LLVM_BASE_DIR}/lib)
+    set(LLVM_TOOLS_BINARY_DIR ${MY_LLVM_BASE_DIR}/bin)
 endif()
 
 message(STATUS "Found LLVM: ${LLVM_PACKAGE_VERSION}")
@@ -46,7 +47,7 @@ endif()
 link_directories(${LLVM_LIBRARY_DIRS})
 add_definitions(${LLVM_DEFINITIONS})
 message(INCLUDES: ${LLVM_LIBRARY_DIRS})
-
+message("LLVM BIN PATH: ${LLVM_TOOLS_BINARY_DIR}")
 
 add_definitions(
 -D__STDC_LIMIT_MACROS
@@ -54,7 +55,11 @@ add_definitions(
 )
 
 find_package(CUDA REQUIRED)
+cuda_find_host_program(CUDA_PTXAS_EXECUTABLE ptxas)
+cuda_find_host_program(CUDA_FATBINARY_EXECUTABLE fatbinary)
 message(CUDART: ${CUDA_CUDART_LIBRARY})
+message("CUDA PTXAS PATH: ${CUDA_PTXAS_EXECUTABLE}") 
+message("CUDA FATBINARY PATH: ${CUDA_FATBINARY_EXECUTABLE}")
 
 if(NOT CUDA_CUDART_LIBRARY)
     message(WARNING "CUDA Runtime Library (shared) not found!")
@@ -73,7 +78,7 @@ endif()
 include_directories(include/)
 include_directories(${PROJECT_BINARY_DIR}/config)
 
-add_executable(${PROJECT_NAME} src/Driver.cpp src/CUDAFrontend.cpp src/CPPFrontend.cpp src/FrontendUtil.cpp src/OrcJit.cpp src/Backend.cpp)
+add_executable(${PROJECT_NAME} src/Driver.cpp src/CUDAFrontend.cpp src/CPPFrontend.cpp src/FrontendUtil.cpp src/OrcJit.cpp src/Backend.cpp src/DeviceCode.cpp)
 
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
   foreach(link_lib IN LISTS LIBRARY_LIST)

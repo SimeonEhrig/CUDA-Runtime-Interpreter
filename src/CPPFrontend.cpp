@@ -28,7 +28,6 @@
 #include <llvm/Support/raw_ostream.h>
 #include <memory>
 
-#include <iostream> //necessary for executor, if the jited prgram has an iostream
 #include <string>
 
 #include "Config.hpp"
@@ -120,9 +119,7 @@ int myFrontend::cpp(int argc, const char **argv, const std::string &outputName, 
 
   // FIXME: This is copied from cc1_main.cpp; simplify and eliminate.
   auto LO = compilerInvocation->getLangOpts();
-  
-//    std::cout << LO->CPlusPlus << std::endl;
-  
+    
   std::string err_msg = "";
   if(!err_msg.empty()){
    llvm::errs() << err_msg << "\n";   
@@ -154,7 +151,7 @@ int myFrontend::cpp(int argc, const char **argv, const std::string &outputName, 
 #if CUI_INTERPRET == 0
    res = myBackend::genObjectFile(std::move(module), "cpp_" + outputName);
 #else
-   res = myBackend::executeJIT(std::move(module));
+   res = myBackend::executeJIT(std::move(module), false);
 #endif
   }
   

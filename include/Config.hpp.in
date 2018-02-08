@@ -6,13 +6,25 @@
 
 //options to write additional information of the compiler instances on the console or in a file
 //
+//print interpreter mode to console
+#define CUI_PRINT_INT_MODE 0
 //write debug information of the backend on the console
 #define CUI_DEBUG_BACKEND 0
 //write the object code in a file, which is generated during the jit process
 #define CUI_DEBUG_JIT_OBJ 0
 //add debug information to the jited code and allow debugging with the gdb (also need the flag -g as argument at start of the cuda-interpreter)
 #define CUI_DEBUG_JIT_INFO 1
+//save ptx, cuda sass and fatbinary code, which is generate by the cuda-interpreter to the folder of the interpreter
+//if 0, the files write to /tmp
+#define CUI_SAVE_DEVICE_CODE 0
 
 //runtime library of of the current cuda installation
 //necessary for automatic libcudart.so load 
 #define CUI_CUDA_RT_LIBRARY "@CUDA_CUDART_LIBRARY@"
+//path to cuda sass and fatbinary compilers
+//necessary for the device-code generation
+#define CUI_CUDA_PTXAS "@CUDA_PTXAS_EXECUTABLE@"
+#define CUI_CUDA_FATBINARY "@CUDA_FATBINARY_EXECUTABLE@"
+
+//path to the llvm and clang tools
+#define CUI_LLVM_BIN "@LLVM_TOOLS_BINARY_DIR@"

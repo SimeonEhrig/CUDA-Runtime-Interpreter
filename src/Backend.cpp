@@ -19,7 +19,6 @@
 #include <llvm/Support/raw_ostream.h>
 #include <memory>
 #include <llvm/Bitcode/BitcodeWriter.h>
-#include <iostream> //necessary for executor, if the jited prgram has an iostream
 
 #include <string>
 #include <llvm/Support/TargetRegistry.h>
@@ -29,7 +28,9 @@
 #include "Backend.hpp"
 #include "OrcJit.hpp"
 
-int myBackend::executeJIT(std::shared_ptr<llvm::Module> module){
+#include <iostream> //necessary for executor, if the jited program has an iostream -> without throw an segmentation fault
+
+int myBackend::executeJIT(std::shared_ptr<llvm::Module> module, bool cudaMode){
   LLVMInitializeX86TargetInfo();
   LLVMInitializeX86Target();
   LLVMInitializeX86TargetMC();
@@ -50,7 +51,7 @@ int myBackend::executeJIT(std::shared_ptr<llvm::Module> module){
   
   llvm::TargetMachine * targetMachine = Target->createTargetMachine(module->getTargetTriple(), "generic", "", TO, RM);
       
-  myBackend::OrcJIT orcJitExecuter(targetMachine);
+  myBackend::OrcJIT orcJitExecuter(targetMachine, cudaMode);
   orcJitExecuter.setDynamicLibrary(std::string(CUI_CUDA_RT_LIBRARY));
   orcJitExecuter.addModule(module);
   

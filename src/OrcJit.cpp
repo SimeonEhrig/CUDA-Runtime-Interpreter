@@ -16,15 +16,14 @@
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/Target/TargetMachine.h"
 #include <string>
-#include <iostream>
 #include <llvm/Support/DynamicLibrary.h>
 #include <llvm/IR/Constants.h>
 
 #include <llvm/ExecutionEngine/Orc/ExecutionUtils.h>
 
 
-myBackend::OrcJIT::OrcJIT(llvm::TargetMachine * targetMachine) 
-                    :  TM(targetMachine), DL(TM->createDataLayout()),
+myBackend::OrcJIT::OrcJIT(llvm::TargetMachine * targetMachine, bool cudaMode) 
+                    :  TM(targetMachine), m_cudaMode(cudaMode) , DL(TM->createDataLayout()),
                     notifyObjectLoaded(*this),
 #if CUI_DEBUG_JIT_INFO == 1
                     ObjectLayer([this]() { return std::make_shared<llvm::SectionMemoryManager>(); }, notifyObjectLoaded),
@@ -43,7 +42,7 @@ bool myBackend::OrcJIT::setDynamicLibrary(std::string path){
     std::string err_msg = "";
     llvm::sys::DynamicLibrary::LoadLibraryPermanently(path.c_str(), &err_msg);
     if(!err_msg.empty()){
-        std::cerr << err_msg << std::endl;
+        llvm::errs() << err_msg << "\n";
         return false;
     }
     return true;
@@ -119,18 +118,23 @@ int myBackend::OrcJIT::runCUDAStaticCtorDtorOnce(bool init)
 
 int myBackend::OrcJIT::runMain(int argc, char ** argv)
 {
-  if(runCUDAStaticInitializersOnce()){
-    llvm::errs() << "CUDA global ctor failed\n";
-    return 1;
+  if(m_cudaMode){
+    if(runCUDAStaticInitializersOnce()){
+        llvm::errs() << "CUDA global ctor failed\n";
+        return 1;
+    }
   }
   
   auto mainSymbol = findSymbol("main");
   int (*mainFP)(int, char**) = (int (*)(int, char**))(uintptr_t)mainSymbol.getAddress().get();
   int res = mainFP(argc, argv);
-  
-  if(runCUDAStaticfinalizersOnce()){
-    llvm::errs() << "CUDA global dtor failed\n";
-    return 1;
+ 
+  if(m_cudaMode){
+    if(runCUDAStaticfinalizersOnce()){
+        llvm::errs() << "CUDA global dtor failed\n";
+        return 1;
+    }
   }
+  
   return res;
 }

@@ -28,7 +28,6 @@
 #include <llvm/Support/raw_ostream.h>
 #include <memory>
 
-#include <iostream> //necessary for executor, if the jited prgram has an iostream
 #include <llvm/Support/DynamicLibrary.h>
 
 #include "Config.hpp"
@@ -79,7 +78,7 @@ int myFrontend::cuda(int argc, const char **argv, const std::string &outputName,
     args.push_back("-fno-use-cxa-atexit"); //magic c++ flag :-/
     driver.CCCIsCPP();
   }
-
+  
   std::unique_ptr<Compilation> compilation(driver.BuildCompilation(args));
   if (!compilation)
     return 0;
@@ -160,7 +159,7 @@ int myFrontend::cuda(int argc, const char **argv, const std::string &outputName,
 #if CUI_INTERPRET == 0
    res = myBackend::genObjectFile(std::move(module), "cu_" + outputName);
 #else
-   res = myBackend::executeJIT(std::move(module));
+   res = myBackend::executeJIT(std::move(module), true);
 #endif
   }
   

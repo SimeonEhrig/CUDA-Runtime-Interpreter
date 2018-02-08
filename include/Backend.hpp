@@ -11,9 +11,10 @@ namespace myBackend {
      * @brief use OrcJit-API to compile llvm IR just in time an execute it
      * 
      * @param module llvm::Module, which contains llvm IR code of a main() function
+     * @param cudaMode enable cudaMode to run CUDA ctor and dtor
      * @return return value of main() function of llvm::Module
      */
-    int executeJIT(std::shared_ptr<llvm::Module> module); 
+    int executeJIT(std::shared_ptr<llvm::Module> module, bool cudaMode); 
     
     /**
      * @brief use MC-Library to generate ELF-Object file -> it can be link to an executable with a normal linker

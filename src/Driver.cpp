@@ -1,5 +1,6 @@
 #include <string>
 #include <libgen.h>
+#include <vector>
 
 #include <llvm/Support/Debug.h>
 #include <llvm/Support/raw_ostream.h>
@@ -85,14 +86,26 @@ int main(int argc, char **argv) {
     std::string firstArg = argv[1];
     //if true, use c++ language in the frontend, else c
     bool cppMode = false;
+#if CUI_DEFAULT_INT_MODE == 1
+    std::vector<char *> new_argv;
+#endif
     
     if(firstArg == "-c" || firstArg == "-cuda_c"){
         cppMode = false;
     }else if(firstArg == "-cpp" || firstArg == "-cuda_cpp"){
         cppMode = true;
     }else{
+#if CUI_DEFAULT_INT_MODE == 1
+        new_argv.push_back((char *)"-cuda_cpp");
+        new_argv.insert(++new_argv.begin(), argv, argv+argc);
+        argv = new_argv.data();
+        ++argc;
+        firstArg = "-cuda_cpp";
+        cppMode = true;
+#else
         llvm::errs() << "unknown interpreter mode: " << firstArg << "\n";
         return 1;
+#endif
     }
     
     //check, if c++ or cuda frontend will use

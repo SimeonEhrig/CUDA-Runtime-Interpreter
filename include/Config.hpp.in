@@ -3,6 +3,8 @@
 
 //if interpret is not enable, it will be generate an object file instead interpret the code
 #define CUI_INTERPRET 1
+//the default mode add internal the argument -cuda_cpp on the first place if the first argument for the interpreter mode selection is missing
+#define CUI_DEFAULT_INT_MODE 0
 
 //options to write additional information of the compiler instances on the console or in a file
 //

@@ -51,28 +51,6 @@ std::string checkSourceFile(const std::string &path, const std::string &fileExte
     return sourceName.substr(0, found_end);
 }
 
-
-/**
- * @brief search after --cuda-gpu-arch=sm_xx string in the argument and extract the sm level
- * 
- * @param argc number of argv
- * @param argv list of arguments
- * @return std::__cxx11::string the sm level (e.g. "30") or "20" if there is no --cuda-gpu-arch=sm_xx argument
- */
-std::string findCUDASMLevel(int argc, char **argv){
-    const std::string searchString = "--cuda-gpu-arch=sm_";
-    
-    //skip interpreter name, -cuda_x and source name
-    for(int i = 2; i < argc; ++i){
-        std::string arg = argv[i];
-        if(arg.compare(0, searchString.length(), searchString) == 0){
-            return arg.substr(searchString.length());
-        }
-    }
-    
-    return "20";
-}
-
 int main(int argc, char **argv) {
     if(argc < 2){
         print_usage();
@@ -200,7 +178,7 @@ int main(int argc, char **argv) {
             return myFrontend::cuda(argc, newArgv, sourceName, fatbinPath, cppMode);
             
         }else{            
-            myDeviceCode::DeviceCodeGenerator deviceCodeGenerator(sourceName, CUI_SAVE_DEVICE_CODE, findCUDASMLevel(argc, argv));
+            myDeviceCode::DeviceCodeGenerator deviceCodeGenerator(sourceName, CUI_SAVE_DEVICE_CODE, argc-3, &argv[3]);
             
             std::string pathPTX = deviceCodeGenerator.generatePTX(argv[2]);
             if(pathPTX.empty()){

@@ -17,8 +17,73 @@
 #include "DeviceCode.hpp"
 #include "FrontendUtil.hpp"
 
-myDeviceCode::DeviceCodeGenerator::DeviceCodeGenerator(std::string soureName, bool saveTmp, std::string smLevel) 
-                                        : m_smLevel(smLevel), m_saveName(saveTmp ? soureName : "/tmp/" + soureName) {}
+myDeviceCode::DeviceCodeGenerator::SpecialArguments myDeviceCode::DeviceCodeGenerator::resolveArgument(std::string input) {
+    const std::string smString = "--cuda-gpu-arch=sm_";
+    if(input.compare(0, smString.length(), smString) == 0) {
+        return smlevel;
+    }
+
+    if(input == "-Xcuda-ptxas") {
+        return ptxas;
+    }
+
+    if(input == "-Xcuda-fatbinary") {
+        return fatbin;
+    }
+    
+    const std::string oString = "-O";
+    if(input.compare(0, oString.length(), oString) == 0) {
+        return optimization;
+    }
+
+    return clang;
+}
+
+myDeviceCode::DeviceCodeGenerator::DeviceCodeGenerator(std::string soureName, bool saveTmp, int argc, char** argv) 
+                                        : m_smLevel("20"), m_saveName(saveTmp ? soureName : "/tmp/" + soureName)
+{
+    for(int i = 0; i < argc; ++i){
+        std::string input = argv[i]; 
+        switch(resolveArgument(input)){
+            case SpecialArguments::smlevel : {
+                const std::string smString = "--cuda-gpu-arch=sm_";
+                m_smLevel = input.substr(smString.length());
+                break;
+            }
+            case SpecialArguments::ptxas : {
+                ++i;
+                if(i == argc){
+                    llvm::errs() << "no argument after last -Xcuda-ptxas\n";
+                    break;
+                }else{
+                    input = argv[i];
+                    ptxasArgs.push_back(input);
+                    break;
+                }
+            }
+            case SpecialArguments::fatbin : {
+                ++i;
+                if(i == argc){
+                    llvm::errs() << "no argument after last -Xcuda-fatbinary\n";
+                    break;
+                }else{
+                    input = argv[i];
+                    fatbinArgs.push_back(input);
+                    break;
+                }
+            }
+            case SpecialArguments::optimization : {
+                clangArgs.push_back(input);
+                ptxasArgs.push_back(input);
+                break;
+            }
+            default : {
+                clangArgs.push_back(input);
+                break;
+            }
+        }
+    }
+}
 
 
 std::string myDeviceCode::DeviceCodeGenerator::generatePTX(std::string pathSource){
@@ -29,8 +94,11 @@ std::string myDeviceCode::DeviceCodeGenerator::generatePTX(std::string pathSourc
     
     //first argument have to be the program name
     argv.push_back(exePathString.c_str());
-    // FIXME : replace static -std=c++14 with function to extract parameters from argv
-    argv.push_back("-std=c++14");    
+    
+    for(std::string &s : clangArgs){
+        argv.push_back(s.c_str());
+    }
+    
     argv.push_back("-S");
     argv.push_back(pathSource.c_str());
     argv.push_back("-o");
@@ -60,8 +128,12 @@ std::string myDeviceCode::DeviceCodeGenerator::generateSASS(std::string &pathPTX
     
     //first argument have to be the program name
     argv.push_back(CUI_CUDA_PTXAS);
+    
+    for(std::string &s : ptxasArgs){
+        argv.push_back(s.c_str());
+    }
+    
     argv.push_back("-m64");
-    argv.push_back("-O0");
     argv.push_back("--gpu-name");
     std::string gpuLevel = "sm_" + m_smLevel;
     argv.push_back(gpuLevel.c_str());
@@ -90,6 +162,7 @@ std::string myDeviceCode::DeviceCodeGenerator::generateFatbinary(std::string &pa
     
     //first argument have to be the program name
     argv.push_back(CUI_CUDA_FATBINARY);
+    
     argv.push_back("--cuda");
     argv.push_back("-64");
     argv.push_back("--create");
@@ -99,6 +172,10 @@ std::string myDeviceCode::DeviceCodeGenerator::generateFatbinary(std::string &pa
     argv.push_back(sassCode.c_str());
     std::string ptxCode = "--image=profile=compute_"+ m_smLevel + ",file=" + pathPTX;
     argv.push_back(ptxCode.c_str());
+    
+    for(std::string &s : fatbinArgs){
+        argv.push_back(s.c_str());
+    }
     //argv list have to finish with a nullptr
     argv.push_back(nullptr);
     

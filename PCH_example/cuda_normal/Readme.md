@@ -1,0 +1,2 @@
+# CUDA example with kernels without templates, which will translate to PCH before PTX
+The makefile works similar to the five stages of compiler pipeline, if clang is translating cuda code. There is a new extra stage before generating the PTX code. First the file will translate to the PCH form an then to PTX. Important is, that the "Header"-files with the kernels will ends with the extension .cu . Otherwise clang will not recognize the cuda syntax.

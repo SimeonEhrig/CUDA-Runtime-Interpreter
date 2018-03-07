@@ -1,0 +1,2 @@
+# CUDA example with kernels with templates, which will translate to PCH before PTX
+This example is really similar to the cuda_normal example. The only difference is, that the kernel launches of the templated CUDA kernels have to be in the dummy.cu, otherwise the kernel will not translated to ptx. I could use the runtime.cu instead the dummy.cu, but it is better to simulate the behavior of cling. So I can easily simulate, what happened, if a kernel launch is missing. 

@@ -1,8 +1,16 @@
 #include <iostream>
 #include <cuda_runtime.h>
+
+//the guard is necessary for the PCH files
+//this behavior is a special thing of the cuda-interpreter
+//this code will read twice, one by the device compiler and one by the host compiler
+//the first time, if the device compiler is working, the includes shall not work, because include of PCH is forbidden
+//the second time, if the host compiler is working, the includes are necessary, otherwise the kernels are not defined
+#ifndef __CUDA_ARCH__
 #include <kernel1.cu>
 #include <kernel2.cu>
 #include <kernel3.cu>
+#endif
 
 int main(int argc, char const *argv[])
 {

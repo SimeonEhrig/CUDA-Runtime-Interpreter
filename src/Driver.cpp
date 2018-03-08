@@ -1,6 +1,9 @@
 #include <string>
 #include <libgen.h>
 #include <vector>
+#include <sstream>
+#include <algorithm>
+#include <iterator>
 
 #include <llvm/Support/Debug.h>
 #include <llvm/Support/raw_ostream.h>
@@ -168,9 +171,36 @@ int main(int argc, char **argv) {
                 return 1;
             }
 #else
+            //check if the option -kernel is set and at the the path(s) to a vector
+            std::vector<std::string> additionalKernels;
+            if( (dynArgv.size() > 3) && (std::string(dynArgv[3]) == "-kernels")){
+                if(dynArgv.size() > 4){
+                    std::istringstream buffer(dynArgv[4]);
+                    std::copy(std::istream_iterator<std::string>(buffer),
+                              std::istream_iterator<std::string>(),
+                              std::back_inserter(additionalKernels));
+                    dynArgv.erase(dynArgv.begin()+3); //remove -kernels
+                    dynArgv.erase(dynArgv.begin()+3); //remove kernel paths
+                }else{
+                    llvm::errs() << "Path to kernels is missing." << "\n";
+                    return 1;
+                }
+                
+            }
             myDeviceCode::DeviceCodeGeneratorPCH deviceCodeGenerator(sourceName, CUI_SAVE_DEVICE_CODE, dynArgv.size()-3, &dynArgv.data()[3]);
             
-            std::string pathPCH = deviceCodeGenerator.generatePCH(dynArgv[2]);
+            //iterate over all extra kernel and build up a PCH file
+            std::string pathPCH;
+            for(std::string &additionalKernel : additionalKernels){
+                pathPCH = deviceCodeGenerator.generatePCH(additionalKernel);
+                if(pathPCH.empty()){
+                    llvm::errs() << "PCH generating failed" << "\n";
+                    return 1;
+                }
+            }
+            
+            //at last, add the main source file whith the initial kernel calls to the PCH
+            pathPCH = deviceCodeGenerator.generatePCH(dynArgv[2]);
             if(pathPCH.empty()){
                 llvm::errs() << "PCH generating failed" << "\n";
                 return 1;
@@ -216,14 +246,21 @@ void print_usage(){
     llvm::outs() << "\n"
     << "Usage: cuda-interpreter [mode] source-file [-fatbin fatbinary-file] [clang-commands ...]" << "\n" << 
     "\n" <<
-    "  mode              choose the interpreter frontend" << "\n" <<
-    "     -c                c interpreter" << "\n" <<
-    "     -cpp              c++ interpreter" << "\n" <<
-    "     -cuda_c           cuda c interpreter" << "\n" <<
-    "     -cuda_cpp         cuda c++ interpreter" << "\n" <<
-    "  -fatbin           path to own compiled fatbin of the source-file" << "\n" <<
-    "                    if -fatbin is missing, the interpreter compiles the device code just in time" <<
-    "  -clang-commands   pass clang argumente to the compiler instance -> see \"clang --help\"" << "\n" 
+    "  mode              choose the interpreter frontend\n" <<
+    "     -c                c interpreter\n" <<
+    "     -cpp              c++ interpreter\n" <<
+    "     -cuda_c           cuda c interpreter\n" <<
+    "     -cuda_cpp         cuda c++ interpreter\n" <<
+    "  -fatbin           path to own compiled fatbin of the source-file\n" <<
+    "                    if -fatbin is missing, the interpreter compiles the device code just in time\n" <<
+#if CUI_PCH_MODE
+    "  -kernels          path to files with cuda kernels\n" <<
+    "                    needs the file ending .cu\n" <<
+    "                    many files are possible with \"kernel1.cu kernel2.cu kernel3.cu ...\"\n" <<
+    "                    note the device code guard __CUDA_ARCH__ for include\n" <<
+    "                       -> see example PCH_example/cuda_template_many_sources\n" <<
+#endif
+    "  -clang-commands   pass clang argumente to the compiler instance -> see \"clang --help\"\n" 
     << "\n";
 }
 

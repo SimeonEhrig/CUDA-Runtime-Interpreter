@@ -34,10 +34,16 @@ std::string myDeviceCode::DeviceCodeGeneratorPCH::generatePCH(std::string pathSo
     argv.push_back("-emit-pch");
     argv.push_back(pathSource.c_str());
     argv.push_back("-o");
-    std::string outputname = m_saveName + ".hpp.pch";
+    std::string outputname = m_saveName + std::to_string(m_counter++) +".cu.pch";
     argv.push_back(outputname.c_str());
     std::string smString = "--cuda-gpu-arch=sm_" + m_smLevel;
     argv.push_back(smString.c_str());
+    
+    if(isPreviousFile()){
+        argv.push_back("-include-pch");
+        argv.push_back(m_previousFile.c_str());
+    }
+    
     argv.push_back("-pthread");
     argv.push_back("--cuda-device-only");
     //argv list have to finish with a nullptr
@@ -50,6 +56,8 @@ std::string myDeviceCode::DeviceCodeGeneratorPCH::generatePCH(std::string pathSo
         llvm::errs() << "error at launching clang instance to generate ptx code" << "\n" << executionError << "\n";
         return "";
     }else{
+        //set the new PCH file as predecessor for the next PCH file
+        m_previousFile = outputname;
         return outputname;
     }
 }

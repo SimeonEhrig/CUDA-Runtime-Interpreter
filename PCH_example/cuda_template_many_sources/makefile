@@ -8,7 +8,7 @@ kernel.fatbin : kernel.ptx
 	$(CUDA_PATH)/bin/fatbinary --cuda -64 --create kernel.fatbin --image=profile=sm_20,file=kernel.sass --image=profile=compute_20,file=kernel.ptx
 
 kernel.ptx : myInclude/dummy.cu myInclude/kernel3.hpp.pch
-	clang++ -S myInclude/dummy.cu -o kernel.ptx -include-pch myInclude/kernel3.hpp.pch -pthread --cuda-device-only
+	clang++ -S runtime.cu -o kernel.ptx -include-pch myInclude/kernel3.hpp.pch -pthread --cuda-device-only
 
 myInclude/kernel3.hpp.pch : myInclude/kernel1.cu myInclude/kernel2.cu myInclude/kernel3.cu
 	clang++ -S -Xclang -emit-pch myInclude/kernel1.cu -o myInclude/kernel1.hpp.pch -pthread --cuda-device-only

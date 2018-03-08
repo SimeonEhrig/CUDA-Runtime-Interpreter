@@ -1,4 +1,5 @@
 #include <iostream>
+#include "cpu_example.hpp"
 
 int main(int argc, char const *argv[])
 {

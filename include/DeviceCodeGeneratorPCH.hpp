@@ -2,6 +2,7 @@
 #define DEVICE_CODE_GENERATOR_PCH_H
 
 #include "DeviceCode.hpp"
+#include "llvm/ADT/SmallString.h"
 
 namespace myDeviceCode {
  
@@ -34,7 +35,16 @@ namespace myDeviceCode {
          * @return std::__cxx11::string the path to the PTX file or an empty string if generation failed
          */
         std::string generatePTX(std::string pathPCH);
+    
+        bool isPreviousFile(){return !m_previousFile.empty();}
+        
+    private:
+        //save the name of the last generated PCH file
+        llvm::SmallString<64> m_previousFile;
+        //will add to the PCH file name
+        unsigned int m_counter = 0;
     };
+    
 }
 
 #endif

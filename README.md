@@ -127,3 +127,18 @@ Example:
 ```bash
   ./cuda-interpreter -cpp ../example_prog/hello.cpp -v
 ```
+
+# PCH and device code generation
+
+PCH (precompiled headers) is a intermediate form of header files, which allows the compiler to reduce the compile time. Specially for templates, where the header files will be read multiple, it's realy useful. For cling, we will use PCH to handle normal and templated device code kernels. There are two reasons for this decision. The first is, that we can fast generate many specializations of a templated kernels. The second reason have to do with generating the fatbinary code. If we generate a fatbinary file for a kernel launch, we have to put in the code of the initial kernel and all kernel definitions of kernels, which will called from initial kernel and his children. To solve this problem, there are two options. The first is to analyze source code and find all kernel calls. Than all needed kernel source code can be glue together and send to the device jit. The second option is to send all defined kernel source codes to the jit inclusive the kernels, which will not used. The second option has the advantage, that we don't need to analyze the code, but we have to glue together the complete device source code and compile all to a fatbinary. PCH is a technique, which allows a fast adding of a new function definition and compiling the complete code to PTX and fatbinary code.
+
+So, I implemented a function (which is not necessary for the cuda-interpreter), which simulate the planned behavior of cling and allows to add an unlimited number of files with kernel definitions to the interpreter process. This is only possible, if the PCH mode is enable. Every new kernel will translate to a PCH file and include his predecessor PCH file, if exist. If the last kernel file is translated, the PCH file will translate to PTX.
+
+## Example to use extra kernel files
+
+To use extra kernel files, you have to enable the PCH mode via Config.hpp, at first. Then the argument `-kernel` is aviable at the 3rd position, comparable the argument `-fatbin`. After the `-kernel` argument you can set the path to the kernel files. There is also possible to declare more files via string.
+
+Example:
+```bash
+  ./cuda-interpreter -cuda_cpp ../PCH_example/cuda_template_many_sources/runtime.cu -kernels "../PCH_example/cuda_template_many_sources/myInclude/kernel1.cu ../PCH_example/cuda_template_many_sources/myInclude/kernel2.cu ../PCH_example/cuda_template_many_sources/myInclude/kernel3.cu" -I../PCH_example/cuda_template_many_sources/myInclude/
+```

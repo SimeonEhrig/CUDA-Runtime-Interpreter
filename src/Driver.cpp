@@ -9,6 +9,7 @@
 #include "CUDAFrontend.hpp"
 #include "CPPFrontend.hpp"
 #include "DeviceCode.hpp"
+#include "DeviceCodeGeneratorPCH.hpp"
 
 //=============================handle the arguments and start the right frontend=============================
 
@@ -177,7 +178,8 @@ int main(int argc, char **argv) {
             
             return myFrontend::cuda(argc, newArgv, sourceName, fatbinPath, cppMode);
             
-        }else{            
+        }else{
+#if CUI_PCH_MODE == 0            
             myDeviceCode::DeviceCodeGenerator deviceCodeGenerator(sourceName, CUI_SAVE_DEVICE_CODE, argc-3, &argv[3]);
             
             std::string pathPTX = deviceCodeGenerator.generatePTX(argv[2]);
@@ -185,6 +187,22 @@ int main(int argc, char **argv) {
                 llvm::errs() << "ptx generation failed" << "\n";
                 return 1;
             }
+#else
+            myDeviceCode::DeviceCodeGeneratorPCH deviceCodeGenerator(sourceName, CUI_SAVE_DEVICE_CODE, argc-3, &argv[3]);
+            
+            std::string pathPCH = deviceCodeGenerator.generatePCH(argv[2]);
+            if(pathPCH.empty()){
+                llvm::errs() << "PCH generating failed" << "\n";
+                return 1;
+            }
+            
+            std::string pathPTX = deviceCodeGenerator.generatePTX(pathPCH);
+            if(pathPTX.empty()){
+                llvm::errs() << "ptx generation failed" << "\n";
+                return 1;
+            }
+            
+#endif
             
             std::string pathSASS = deviceCodeGenerator.generateSASS(pathPTX);
             if(pathSASS.empty()){

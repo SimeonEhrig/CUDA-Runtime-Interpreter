@@ -7,13 +7,14 @@
 namespace myDeviceCode {
     
     class DeviceCodeGenerator {
-    private:
+    protected:
         std::string m_smLevel;
         std::string m_saveName;
         llvm::SmallVector<std::string, 128> clangArgs;
         llvm::SmallVector<std::string, 128> ptxasArgs;
         llvm::SmallVector<std::string, 128> fatbinArgs;
         
+    private:
         enum SpecialArguments {
             smlevel = 0,
             ptxas = 1,

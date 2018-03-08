@@ -5,8 +5,9 @@ It's a prototype of an interpreter, which can interpret the host code of a CUDA 
 - clang-dev >= 5.0
 - llvm-dev >= 5.0
 - cuda Toolkit
-- cmake 2.8.8
+- cmake 3.8.2
 - zlib1g-dev
+- libedit-dev
 
 Tested with clang/llvm 5.0, 6.0 and CUDA 8.0.61
 
@@ -58,6 +59,8 @@ There are some options to get out information from the different stages of the i
 
 A special case is `#define CUI_INTERPRET`. It changes the backend. If it is defined with `#define CUI_INTERPRET 1`, the interpreter use the JIT-Backend. If `CUI_INTERPRET` has the value 0, it will generate an object file. The object file can be linked (ld) to an executable.
 
+* CUI_PCH_MODE [0|1] if the value is 1, add an additional compiler stage to the device jit
+  * the CUDA device code will translate to a PCH file and then to PTX 
 * CUI_PRINT_INT_MODE [0|1] if the value is 1, print which interpreter mode is selected
 * CUI_DEBUG_BACKEND [0|1] if the value is 1, the llvm::DebugFlag will be enabled and all debug information of the backend will be written on the console (independent of CUI_INTERPRET)
 * CUI_DEBUG_JIT_OBJ [0|1] if the value is 1, the jit backend write the object code in a file, which is generated during the jit process (only if CUI_INTERPRET is 1)

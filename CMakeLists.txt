@@ -2,7 +2,7 @@
 #   base
 ############################################################
 
-cmake_minimum_required(VERSION 2.8.8)
+cmake_minimum_required(VERSION 3.8.2)
 
 set(CMAKE_CONFIGURATION_TYPES "Debug;Release" CACHE STRING "Configs" FORCE)
 set(CMAKE_SUPPRESS_REGENERATION TRUE)
@@ -78,7 +78,7 @@ endif()
 include_directories(include/)
 include_directories(${PROJECT_BINARY_DIR}/config)
 
-add_executable(${PROJECT_NAME} src/Driver.cpp src/CUDAFrontend.cpp src/CPPFrontend.cpp src/FrontendUtil.cpp src/OrcJit.cpp src/Backend.cpp src/DeviceCode.cpp)
+add_executable(${PROJECT_NAME} src/Driver.cpp src/CUDAFrontend.cpp src/CPPFrontend.cpp src/FrontendUtil.cpp src/OrcJit.cpp src/Backend.cpp src/DeviceCode.cpp src/DeviceCodeGeneratorPCH.cpp)
 
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
   foreach(link_lib IN LISTS LIBRARY_LIST)

@@ -12,7 +12,7 @@ namespace myFrontend {
      * @param cppMode if true, enable cpp mode of compilerInstance, else use just c mode
      * @return 1 if frontend failed, else status code of the executed program
      */
-    int cpp(int argc, const char **argv, const std::string &outputName, bool cppMode);
+    int cpp(int argc, char **argv, const std::string &outputName, bool cppMode);
 }
     
 #endif

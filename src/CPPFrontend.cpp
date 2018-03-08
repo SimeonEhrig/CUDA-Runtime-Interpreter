@@ -38,7 +38,7 @@
 using namespace clang;
 using namespace clang::driver;
 
-int myFrontend::cpp(int argc, const char **argv, const std::string &outputName, bool cppMode) {
+int myFrontend::cpp(int argc, char **argv, const std::string &outputName, bool cppMode) {
   //===============================get main part===============================
   void *MainAddr = (void*) (intptr_t) myFrontend::getExecutablePath;
   std::string exePath = myFrontend::getExecutablePath(argv[0]);

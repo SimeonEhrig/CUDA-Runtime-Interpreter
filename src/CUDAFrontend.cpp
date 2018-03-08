@@ -38,7 +38,7 @@
 using namespace clang;
 using namespace clang::driver;
 
-int myFrontend::cuda(int argc, const char **argv, const std::string &outputName, const std::string &fatbinPath, bool cppMode) {
+int myFrontend::cuda(int argc, char **argv, const std::string &outputName, const std::string &fatbinPath, bool cppMode) {
   //===============================get main part===============================
   void *mainAddr = (void*) (intptr_t) myFrontend::getExecutablePath;
   std::string exePath = myFrontend::getExecutablePath(argv[0]);

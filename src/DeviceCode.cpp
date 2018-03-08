@@ -100,6 +100,8 @@ std::string myDeviceCode::DeviceCodeGenerator::generatePTX(std::string pathSourc
     }
     
     argv.push_back("-S");
+    argv.push_back("-x");
+    argv.push_back("cuda");
     argv.push_back(pathSource.c_str());
     argv.push_back("-o");
     std::string outputname = m_saveName + ".ptx";

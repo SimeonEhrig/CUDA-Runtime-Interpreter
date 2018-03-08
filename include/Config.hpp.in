@@ -7,6 +7,7 @@
 #define CUI_DEFAULT_INT_MODE 0
 
 //use precompiled headers at device kernel generation
+//attention, is not working with .c and .cpp files
 #define CUI_PCH_MODE 0
  
 //options to write additional information of the compiler instances on the console or in a file

@@ -13,6 +13,6 @@ namespace myFrontend {
      * @param cppMode if true, enable cpp mode of compilerInstance, else use just c mode
      * @return 1 if frontend failed, else status code of the executed program
      */
-    int cuda(int argc, const char **argv, const std::string &outputName, const std::string &fatbinPath, bool cppMode);
+    int cuda(int argc, char **argv, const std::string &outputName, const std::string &fatbinPath, bool cppMode);
 }
 #endif

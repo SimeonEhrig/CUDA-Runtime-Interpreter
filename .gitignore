@@ -12,3 +12,6 @@ example_prog/*.fatbin
 #link to llvm lib
 lib
 lib64
+
+#built Singularity Container
+Singularity.sing

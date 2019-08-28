@@ -2,7 +2,8 @@ Bootstrap: docker
 From: nvidia/cuda:8.0-devel-ubuntu16.04
 
 %help
-	This container contains a ubuntu 16.04 environment with a cuda 8 SDK. It use a docker container developed by nvidia as template: https://hub.docker.com/r/nvidia/cuda/
+	The container provide an environment to build the CUDA-Runtime-Interpreter prototype.
+	It based on the cuda docker container: https://hub.docker.com/r/nvidia/cuda/
 
 %setup
 
